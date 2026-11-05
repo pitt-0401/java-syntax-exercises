@@ -1,0 +1,68 @@
+# Publishes web/ to GitHub Pages on every push to main.
+# web/catch-up.pdf is committed (built locally by ./make.sh) -- the .tex is not in this repo.
+name: Publish practice website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: JavaScript parses
+        run: for f in web/js/*.js; do node --check "$f"; done
+      - name: Exercises load and every model answer passes its own check
+        run: |
+          node -e '
+            globalThis.window = globalThis;
+            require("./web/js/java-eval.js");
+            require("./web/js/exercises.js");
+            const { evaluate, sameValue } = JavaEval;
+            const norm = s => s.trim().replace(/\s+/g, " ").replace(/ ?([^\w\s$]) ?/g, "$1").replace(/[;{\s]+$/, "");
+            const env = (vars, vals = {}) => Object.fromEntries(Object.entries(vars || {}).map(([n, [t, v]]) => [n, { type: t, v: n in vals ? vals[n] : v }]));
+            let bad = 0;
+            for (const ex of EXERCISES) ex.parts.forEach(p => {
+              if (p.kind === "line" && !p.answers.some(a => norm(a) === norm(p.solution))) { bad++; console.log(ex.id, "solution is not an accepted answer"); }
+              if (p.kind === "choice" && !(p.answer < p.options.length)) { bad++; console.log(ex.id, "choice answer out of range"); }
+              if (p.kind === "expr" && p.mode === "example") {
+                const exp = p.expected || evaluate(p.ref || ex.ref, env(ex.vars)).value;
+                if (!sameValue(evaluate(p.solution || ex.exampleSolution, env(ex.vars)).value, exp)) { bad++; console.log(ex.id, "example solution is wrong"); }
+              }
+            });
+            console.log(EXERCISES.length, "exercises,", bad, "problems");
+            process.exit(bad ? 1 : 0);
+          '
+      - name: Cheat sheet is the student PDF only
+        run: |
+          test -f web/catch-up.pdf || { echo "web/catch-up.pdf is missing -- run ./make.sh"; exit 1; }
+          if ls web | grep -i solution; then echo "A solutions file is in web/ -- remove it"; exit 1; fi
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4
