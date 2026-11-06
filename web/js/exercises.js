@@ -1,5 +1,4 @@
-// All practice exercises of the catch-up pack (Part 2 of catch-up.tex), one object per exercise.
-// Keep this file in sync with catch-up.tex when you change an exercise there.
+// All practice exercises, one object per exercise.
 //
 // Part kinds (how a part is answered and checked):
 //   line      one line of Java          -> compared with `answers` (spacing ignored), else the student compares
@@ -11,15 +10,14 @@
 //   lines     program output            -> line by line
 //   code      a method / class          -> the student compares with the solution (+ a test file for VS Code)
 //   free      a short explanation       -> the student compares with the sample solution
-//   paper     on paper (e.g., a UML diagram) -> the student compares with the solution
 // UML members starting with "_" are static (underlined).
 
 window.SECTIONS = [
-  { id: 'A', title: 'One line of Java', time: '10 min',
+  { id: 'A', title: 'Statements and headers', time: '10 min',
     task: 'Write <em>one</em> line of Java for each item: a statement, an expression, or a header.' },
   { id: 'B', title: 'Problem statement → Java expression', time: '15 min',
-    task: 'Write a Java expression for each item, using the variables so it works for any value. All variables are already declared.<br>The checker runs your expression with the given values <em>and</em> with other values, just like a method that is called more than once.' },
-  { id: 'C', title: 'Arrays, loops & input', time: '50 min',
+    task: 'Write one Java expression for each item, using the declared variables instead of hard-coded numbers. Your expression must evaluate to the correct result for any value.' },
+  { id: 'C', title: 'Arrays, loops & input', time: '80 min',
     task: 'Implement each method with the given header. Most of them follow the same pattern:',
     code: `public static RESULT_TYPE name(int[] values) {
     RESULT_TYPE result = START;            // e.g., 0 for a sum, new int[...] for an array
@@ -28,10 +26,10 @@ window.SECTIONS = [
     }
     return result;
 }` },
-  { id: 'D', title: 'Trace it', time: '30 min',
-    task: 'Trace each piece of code by hand, without a computer. This is how sorting, searching, stacks, and queues are asked on the exam.' },
-  { id: 'E', title: 'UML ↔ Java', time: '60 min',
-    task: 'Implement the <strong>highlighted</strong> parts of each class diagram. First translate the diagram line by line (cheat sheet: “Reading UML”), then add the logic.' },
+  { id: 'D', title: 'Tracing', time: '30 min',
+    task: 'Work through each piece of code by hand, step by step, without running it. Write down what changes after each step.' },
+  { id: 'E', title: 'Classes and objects', time: '75 min',
+    task: 'Implement each class from its diagram or description. For a diagram, implement the <strong>highlighted</strong> parts: first translate the diagram line by line, then add the logic.' },
   { id: 'F', title: 'Debugging', time: '15 min',
     task: 'Each code snippet compiles but does not work as intended (wrong result or crash). For each: (1) write the corrected line of code, (2) briefly explain why the original line is incorrect.' },
 ];
@@ -78,15 +76,15 @@ window.EXERCISES = [
       wrong: [{ answer: 'public double average(int[] values)', msg: 'The method is <u>underlined</u> → it is <code>static</code>.' },
               { answer: 'public static double average(values: int[])', msg: 'UML writes <code>name: type</code>, Java writes <code>type name</code> → <code>int[] values</code>.' }] }] },
   { id: 'A.8', section: 'A', body: 'Write the Java header for the <strong>highlighted</strong> UML method.',
-    uml: { classes: [{ name: 'Seating', attrs: ['- seats: char[][]'], methods: ['+ Seating(rows: int, cols: int)', '+ getRow(r: int): char[]'], hl: { methods: [1] } }] },
-    parts: [{ kind: 'line', answers: ['public char[] getRow(int r)'], solution: 'public char[] getRow(int r)',
-      wrong: [{ answer: 'public char getRow(int r)', msg: 'The return type is <code>char[]</code>: a whole row (an array), not one <code>char</code>.' },
-              { answer: 'public char[][] getRow(int r)', msg: 'One row of a 2D array is a 1D array → <code>char[]</code>.' }] }] },
+    uml: { classes: [{ name: 'Seating', attrs: ['- seats: char[][]'], methods: ['+ Seating(rows: int, cols: int)', '+ getRow(row: int): char[]'], hl: { methods: [1] } }] },
+    parts: [{ kind: 'line', answers: ['public char[] getRow(int row)'], solution: 'public char[] getRow(int row)',
+      wrong: [{ answer: 'public char getRow(int row)', msg: 'The return type is <code>char[]</code>: a whole row (an array), not one <code>char</code>.' },
+              { answer: 'public char[][] getRow(int row)', msg: 'One row of a 2D array is a 1D array → <code>char[]</code>.' }] }] },
   { id: 'A.9', section: 'A', body: 'Write the Java header for the <strong>highlighted</strong> UML method.',
-    uml: { classes: [{ name: 'Team', attrs: ['- players: ArrayList<Player>'], methods: ['+ addPlayer(p: Player)', '+ getSize(): int'], hl: { methods: [0] } }] },
-    parts: [{ kind: 'line', answers: ['public void addPlayer(Player p)'], solution: 'public void addPlayer(Player p)',
-      wrong: [{ answer: 'public addPlayer(Player p)', msg: 'No return type in UML → <code>void</code>. Without a return type, Java expects a constructor → compile error.' },
-              { answer: 'public void addPlayer(ArrayList<Player> p)', msg: 'The parameter is <em>one</em> <code>Player</code> (<code>p: Player</code>), not the whole list.' }] }] },
+    uml: { classes: [{ name: 'Team', attrs: ['- players: ArrayList<Player>'], methods: ['+ addPlayer(player: Player)', '+ getSize(): int'], hl: { methods: [0] } }] },
+    parts: [{ kind: 'line', answers: ['public void addPlayer(Player player)'], solution: 'public void addPlayer(Player player)',
+      wrong: [{ answer: 'public addPlayer(Player player)', msg: 'No return type in UML → <code>void</code>. Without a return type, Java expects a constructor → compile error.' },
+              { answer: 'public void addPlayer(ArrayList<Player> player)', msg: 'The parameter is <em>one</em> <code>Player</code> (<code>player: Player</code>), not the whole list.' }] }] },
   { id: 'A.10', section: 'A', body: 'In the constructor <code>Book(String title)</code>, assign the parameter <code>title</code> to the attribute <code>title</code>.',
     parts: [{ kind: 'line', answers: ['this.title = title;'], solution: 'this.title = title;',
       wrong: [{ answer: 'title = title;', msg: 'Inside the constructor, <code>title</code> means the <em>parameter</em> → it is assigned to itself and the attribute stays <code>null</code>. Use <code>this.title</code>.' },
@@ -95,7 +93,7 @@ window.EXERCISES = [
     parts: [{ kind: 'line', answers: ['super(brand);'], solution: 'super(brand);',
       wrong: [{ answer: 'super(brand, seats);', msg: '<code>Vehicle</code> has no constructor with 2 parameters → compile error. <code>seats</code> belongs to <code>Car</code>: <code>this.seats = seats;</code> comes next.' },
               { answer: 'Vehicle(brand);', msg: 'Call the superclass constructor with <code>super(...)</code>, not with its name → compile error.' },
-              { answer: 'this.brand = brand;', msg: '<code>brand</code> is private in <code>Vehicle</code> → <code>Car</code> cannot access it. Let <code>Vehicle</code> store it: <code>super(brand);</code>' }] }],
+              { answer: 'this.brand = brand;', msg: 'Without a <code>super(...)</code> line, Java first calls <code>super()</code> on its own, and <code>Vehicle</code> has no constructor without parameters → compile error. Pass <code>brand</code> to the <code>Vehicle</code> constructor: <code>super(brand);</code>' }] }],
     note: '<code>super(...)</code> must be the <strong>first</strong> line of the constructor.' },
   { id: 'A.12', section: 'A', body: '<code>Car</code> extends <code>Vehicle</code>, whose <code>toString()</code> returns, e.g., <code>"Toyota"</code>. Write the <code>return</code> statement of <code>Car</code>’s <code>toString()</code> so that it returns, e.g., <code>"Toyota, seats: 4"</code>.',
     parts: [{ kind: 'line', answers: ['return super.toString() + ", seats: " + seats;', 'return super.toString() + ", seats: " + this.seats;', 'return super.toString() + ", seats: " + getSeats();'], solution: 'return super.toString() + ", seats: " + seats;',
@@ -113,11 +111,11 @@ window.EXERCISES = [
               { answer: 'values[2]', msg: 'Works only for length 5. Compute the index from <code>values.length</code>.' },
               { answer: 'values[values.length / 2.0]', msg: 'An index must be an <code>int</code> → compile error. <code>5 / 2</code> is already <code>2</code> (int division).' }] }],
     note: 'Int division helps here: <code>5 / 2</code> is <code>2</code>, exactly the middle index.' },
-  { id: 'A.15', section: 'A', body: 'Access the <strong>last</strong> element in row <code>r</code> of <code>int[][] grid</code>. Rows can have different lengths.',
-    parts: [{ kind: 'line', answers: ['grid[r][grid[r].length - 1]'], solution: 'grid[r][grid[r].length - 1]',
-      wrong: [{ answer: 'grid[r][grid.length - 1]', msg: '<code>grid.length</code> is the number of <em>rows</em>. The length of row <code>r</code> is <code>grid[r].length</code>.' },
-              { answer: 'grid[r][grid[r].length]', msg: 'The last index is <code>length - 1</code> → <code>ArrayIndexOutOfBoundsException</code>.' },
-              { answer: 'grid[r][grid[0].length - 1]', msg: 'That uses the length of row 0, but rows can have different lengths. Use <code>grid[r].length</code>.' }] }] },
+  { id: 'A.15', section: 'A', body: 'Access the <strong>last</strong> element in row <code>row</code> of <code>int[][] grid</code>. Rows can have different lengths.',
+    parts: [{ kind: 'line', answers: ['grid[row][grid[row].length - 1]'], solution: 'grid[row][grid[row].length - 1]',
+      wrong: [{ answer: 'grid[row][grid.length - 1]', msg: '<code>grid.length</code> is the number of <em>rows</em>. The length of row <code>row</code> is <code>grid[row].length</code>.' },
+              { answer: 'grid[row][grid[row].length]', msg: 'The last index is <code>length - 1</code> → <code>ArrayIndexOutOfBoundsException</code>.' },
+              { answer: 'grid[row][grid[0].length - 1]', msg: 'That uses the length of row 0, but rows can have different lengths. Use <code>grid[row].length</code>.' }] }] },
   { id: 'A.16', section: 'A', body: 'Given <code>ArrayList&lt;String&gt; names</code>, create an <code>int</code> array <code>scores</code> with one element per name.',
     parts: [{ kind: 'line', answers: ['int[] scores = new int[names.size()];'], solution: 'int[] scores = new int[names.size()];',
       wrong: [{ answer: 'int[] scores = new int[names.length];', msg: '<code>.length</code> is for arrays. An <code>ArrayList</code> has <code>.size()</code> → compile error.' },
@@ -136,10 +134,11 @@ window.EXERCISES = [
       wrong: [{ answer: 'private ArrayList<Book> books;', msg: 'This only declares it → <code>books</code> is <code>null</code>, and the first <code>books.add(...)</code> throws a <code>NullPointerException</code>.' },
               { answer: 'public ArrayList<Book> books = new ArrayList<>();', msg: 'Attributes are <code>private</code> (encapsulation).' }] }] },
   { id: 'A.20', section: 'A', body: 'Write the <code>catch</code> header that handles text such as <code>abc</code> typed for <code>scanner.nextInt()</code>.',
-    parts: [{ kind: 'line', answers: ['catch (InputMismatchException e) {', '} catch (InputMismatchException e) {', 'catch (InputMismatchException ex) {', '} catch (InputMismatchException ex) {', 'catch (java.util.InputMismatchException e) {', '} catch (java.util.InputMismatchException e) {'], solution: 'catch (InputMismatchException e) {',
-      wrong: [{ answer: 'catch (NumberFormatException e) {', msg: '<code>nextInt()</code> throws an <code>InputMismatchException</code> → this <code>catch</code> does not catch it, and the program still crashes.' },
+    parts: [{ kind: 'line', answers: ['catch (InputMismatchException exception) {', '} catch (InputMismatchException exception) {', 'catch (InputMismatchException e) {', '} catch (InputMismatchException e) {', 'catch (InputMismatchException ex) {', '} catch (InputMismatchException ex) {', 'catch (java.util.InputMismatchException e) {', '} catch (java.util.InputMismatchException e) {'], solution: 'catch (InputMismatchException exception) {',
+      wrong: [{ answer: 'catch (NumberFormatException exception) {', msg: '<code>nextInt()</code> throws an <code>InputMismatchException</code> → this <code>catch</code> does not catch it, and the program still crashes.' },
+              { answer: 'catch (NumberFormatException e) {', msg: '<code>nextInt()</code> throws an <code>InputMismatchException</code> → this <code>catch</code> does not catch it, and the program still crashes.' },
               { answer: '} catch (NumberFormatException e) {', msg: '<code>nextInt()</code> throws an <code>InputMismatchException</code> → this <code>catch</code> does not catch it, and the program still crashes.' },
-              { answer: 'catch (InputMismatchException) {', msg: 'A <code>catch</code> needs a variable name, e.g., <code>e</code> → compile error.' }] }],
+              { answer: 'catch (InputMismatchException) {', msg: 'A <code>catch</code> needs a variable name, e.g., <code>exception</code> → compile error.' }] }],
     note: 'Needs <code>import java.util.InputMismatchException;</code> (or <code>import java.util.*;</code>).' },
   { id: 'A.21', section: 'A', body: 'Check whether <code>String name</code> has at least one character. If <code>name</code> is <code>null</code>, the result is <code>false</code> (no crash).',
     parts: [{ kind: 'line', answers: ['name != null && name.length() > 0', 'name != null && name.length() >= 1', 'name != null && name.length() != 0', 'name != null && !name.equals("")', 'name != null && !"".equals(name)', 'name != null && !name.isEmpty()'], solution: 'name != null && name.length() > 0',
@@ -162,12 +161,12 @@ window.EXERCISES = [
     ref: 'price * (1 - rate)',
     parts: [{ kind: 'expr', mode: 'vars' }],
     note: '<code>price * rate</code> is what you <em>save</em> (10.0), not what you pay (40.0). <code>price - price * rate</code> also works.' },
-  { id: 'B.2', section: 'B', body: 'Calculate the average of three <code>int</code>s as a <code>double</code>.',
-    vars: { a: ['int', 3], b: ['int', 4], c: ['int', 4] },
-    tests: [{ a: 1, b: 2, c: 2 }, { a: 10, b: 0, c: 0 }],
-    ref: '(a + b + c) / 3.0',
-    parts: [{ kind: 'expr', mode: 'vars' }],
-    note: '<code>/ 3</code> would give <code>3</code>, not <code>3.67</code> (int division).' },
+  { id: 'B.2', section: 'B', body: 'Declare an <code>int</code> variable <code>remainingMinutes</code> and store in it the minutes that are left over after the full hours in <code>totalMinutes</code>. For example, 135 minutes are 2 hours and 15 minutes → 15.',
+    vars: { totalMinutes: ['int', 135] },
+    tests: [{ totalMinutes: 60 }, { totalMinutes: 59 }, { totalMinutes: 200 }],
+    ref: 'int remainingMinutes = totalMinutes % 60;',
+    parts: [{ kind: 'expr', mode: 'statement', target: 'remainingMinutes', declare: 'int', label: 'A declaration with a value' }],
+    note: '<code>%</code> gives the remainder of a division: <code>135 % 60</code> is <code>15</code>. <code>totalMinutes - totalMinutes / 60 * 60</code> also works (int division).' },
   { id: 'B.3', section: 'B', body: 'Check whether a student passes: a <code>score</code> of at least 60 <strong>and</strong> an <code>attendance</code> of at least 80 %.',
     vars: { score: ['int', 72], attendance: ['double', 0.85] },
     tests: [{ score: 59, attendance: 0.9 }, { score: 60, attendance: 0.8 }, { score: 90, attendance: 0.79 }],
@@ -305,8 +304,8 @@ public class Practice {
     parts: [{ kind: 'code', starter: 'public static double[] sharePercent(int[] votes) {\n    \n}',
       solution: `public static double[] sharePercent(int[] votes) {
     int total = 0;
-    for (int v : votes) {
-        total += v;
+    for (int vote : votes) {
+        total += vote;
     }
     double[] shares = new double[votes.length];
     for (int i = 0; i < votes.length; i++) {
@@ -324,7 +323,103 @@ public class Practice {
         System.out.println(Arrays.toString(sharePercent(new int[]{1, 1, 2})) + "   (expected [25.0, 25.0, 50.0])");
     }
 }` }] },
-  { id: 'C.6', section: 'C', title: 'rowAverages (2D)',
+  { id: 'C.6', section: 'C', title: 'max',
+    body: 'Implement <code>public static int max(int[] values)</code>: return the largest element.<br><code>max(new int[]{4, 17, 9, 17, 2})</code> returns <code>17</code>. Assume the array is not empty. The numbers can be negative.',
+    parts: [{ kind: 'code', starter: 'public static int max(int[] values) {\n    \n}',
+      solution: `public static int max(int[] values) {
+    int largest = values[0];               // not 0: all values could be negative
+    for (int i = 1; i < values.length; i++) {
+        if (values[i] > largest) {
+            largest = values[i];
+        }
+    }
+    return largest;
+}`,
+      test: `public class Practice {
+    // paste your max method here
+
+    public static void main(String[] args) {
+        System.out.println(max(new int[]{4, 17, 9, 17, 2}) + "   (expected 17)");
+        System.out.println(max(new int[]{-5, -2, -8}) + "   (expected -2)");
+        System.out.println(max(new int[]{7}) + "   (expected 7)");
+    }
+}` }],
+    note: 'Starting with <code>largest = 0</code> gives <code>0</code> for <code>{-5, -2, -8}</code>. Start with the first element instead.' },
+  { id: 'C.7', section: 'C', title: 'indexOf',
+    body: 'Implement <code>public static int indexOf(int[] values, int target)</code>: return the index of the <strong>first</strong> element equal to <code>target</code>, or <code>-1</code> if there is none.<br>For <code>values = {4, 17, 9, 17, 2}</code>: <code>indexOf(values, 17)</code> returns <code>1</code>, and <code>indexOf(values, 5)</code> returns <code>-1</code>.',
+    parts: [{ kind: 'code', starter: 'public static int indexOf(int[] values, int target) {\n    \n}',
+      solution: `public static int indexOf(int[] values, int target) {
+    for (int i = 0; i < values.length; i++) {
+        if (values[i] == target) {
+            return i;                      // found: stop right here
+        }
+    }
+    return -1;                             // the loop ended: not found
+}`,
+      test: `public class Practice {
+    // paste your indexOf method here
+
+    public static void main(String[] args) {
+        int[] values = {4, 17, 9, 17, 2};
+        System.out.println(indexOf(values, 17) + "   (expected 1)");
+        System.out.println(indexOf(values, 4) + "   (expected 0)");
+        System.out.println(indexOf(values, 5) + "   (expected -1)");
+        System.out.println(indexOf(new int[]{}, 5) + "   (expected -1)");
+    }
+}` }],
+    note: 'The <code>return -1;</code> goes <em>after</em> the loop. Inside the loop, in an <code>else</code>, it would stop at the first element that does not match.' },
+  { id: 'C.8', section: 'C', title: 'countVowels (String)',
+    body: 'Implement <code>public static int countVowels(String word)</code>: return how many letters of <code>word</code> are vowels (<code>a</code>, <code>e</code>, <code>i</code>, <code>o</code>, <code>u</code>). The word is all lowercase.<br><code>countVowels("banana")</code> returns <code>3</code>.',
+    parts: [{ kind: 'code', starter: 'public static int countVowels(String word) {\n    \n}',
+      solution: `public static int countVowels(String word) {
+    int count = 0;
+    for (int i = 0; i < word.length(); i++) {
+        char letter = word.charAt(i);
+        if (letter == 'a' || letter == 'e' || letter == 'i' || letter == 'o' || letter == 'u') {
+            count++;
+        }
+    }
+    return count;
+}`,
+      test: `public class Practice {
+    // paste your countVowels method here
+
+    public static void main(String[] args) {
+        System.out.println(countVowels("banana") + "   (expected 3)");
+        System.out.println(countVowels("rhythm") + "   (expected 0)");
+        System.out.println(countVowels("") + "   (expected 0)");
+    }
+}` }],
+    note: 'A String works like an array of characters: <code>word.length()</code> (with parentheses) and <code>word.charAt(i)</code> instead of <code>values.length</code> and <code>values[i]</code>. A <code>char</code> is written in single quotes: <code>\'a\'</code>.' },
+  { id: 'C.9', section: 'C', title: 'letterGrade (write the header)',
+    body: 'Write a <code>public static</code> method <code>letterGrade</code> that takes a score (a whole number) and returns the letter grade as a <code>String</code>: <code>"A"</code> for 90 and above, <code>"B"</code> for 80–89, <code>"C"</code> for 70–79, <code>"D"</code> for 60–69, and <code>"F"</code> below 60.<br>This time, write the method header yourself.',
+    parts: [{ kind: 'code', starter: '',
+      solution: `public static String letterGrade(int score) {
+    if (score >= 90) {
+        return "A";
+    } else if (score >= 80) {              // only reached if score < 90
+        return "B";
+    } else if (score >= 70) {
+        return "C";
+    } else if (score >= 60) {
+        return "D";
+    } else {
+        return "F";
+    }
+}`,
+      test: `public class Practice {
+    // paste your letterGrade method here
+
+    public static void main(String[] args) {
+        System.out.println(letterGrade(95) + "   (expected A)");
+        System.out.println(letterGrade(80) + "   (expected B)");
+        System.out.println(letterGrade(79) + "   (expected C)");
+        System.out.println(letterGrade(60) + "   (expected D)");
+        System.out.println(letterGrade(12) + "   (expected F)");
+    }
+}` }],
+    note: 'Check from the top down. Each <code>else if</code> runs only when every condition above it was false, so <code>score >= 80</code> does not need <code>&amp;&amp; score &lt; 90</code>.' },
+  { id: 'C.10', section: 'C', title: 'rowAverages (2D)',
     body: 'Implement <code>public static double[] rowAverages(int[][] scores)</code>: return the average of each row. Rows can have <strong>different lengths</strong>!',
     code: `int[][] scores = { {80, 90, 100}, {70, 75, 80, 85}, {60, 65} };
 rowAverages(scores)   // returns {90.0, 77.5, 62.5}`,
@@ -350,7 +445,7 @@ public class Practice {
         System.out.println(Arrays.toString(rowAverages(scores)) + "   (expected [90.0, 77.5, 62.5])");
     }
 }` }] },
-  { id: 'C.7', section: 'C', title: 'columnTotals (2D)',
+  { id: 'C.11', section: 'C', title: 'columnTotals (2D)',
     body: 'Implement <code>public static int[] columnTotals(int[][] sales)</code>: return the total of each <strong>column</strong>. Assume that all rows have the same length.',
     code: `int[][] sales = { {10, 20, 30, 40}, {15, 25, 35, 45}, {5, 10, 15, 20} };
 columnTotals(sales)   // returns {30, 55, 80, 105}`,
@@ -379,7 +474,30 @@ public class Practice {
     }
 }` }],
     note: 'The index order is always <code>[row][col]</code>, whichever loop is outside.' },
-  { id: 'C.8', section: 'C', title: 'Input & arrays: main',
+  { id: 'C.12', section: 'C', title: 'makeGrid (2D)',
+    body: 'Implement <code>public static int[][] makeGrid(int rows, int cols)</code>: create a new 2D array with <code>rows</code> rows and <code>cols</code> columns and fill it with the numbers 0, 1, 2, … row by row.<br><code>makeGrid(2, 3)</code> returns <code>{{0, 1, 2}, {3, 4, 5}}</code>.',
+    parts: [{ kind: 'code', starter: 'public static int[][] makeGrid(int rows, int cols) {\n    \n}',
+      solution: `public static int[][] makeGrid(int rows, int cols) {
+    int[][] grid = new int[rows][cols];
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < cols; col++) {
+            grid[row][col] = row * cols + col;
+        }
+    }
+    return grid;
+}`,
+      test: `import java.util.Arrays;
+
+public class Practice {
+    // paste your makeGrid method here
+
+    public static void main(String[] args) {
+        System.out.println(Arrays.deepToString(makeGrid(2, 3)) + "   (expected [[0, 1, 2], [3, 4, 5]])");
+        System.out.println(Arrays.deepToString(makeGrid(3, 1)) + "   (expected [[0], [1], [2]])");
+    }
+}` }],
+    note: 'A counter works too: <code>int next = 0;</code> before the loops and <code>grid[row][col] = next; next++;</code> inside.' },
+  { id: 'C.13', section: 'C', title: 'Input & arrays: main',
     body: 'Implement a <code>main</code> method that<ul><li>reads 5 scores (whole numbers) from the keyboard into an <code>int</code> array,</li><li>rejects input that is not a whole number and asks again (<code>hasNextInt()</code>),</li><li>prints the average with 2 decimals.</li></ul>',
     code: `Score 1: 80
 Score 2: abc
@@ -410,7 +528,7 @@ Average: 80.00`, codeLang: 'text',
 
   // ------------------------------------------------------------------ D
   { id: 'D.1', section: 'D', title: 'Sorting: pass by pass',
-    body: 'Write down the array after each pass of the <strong>outer</strong> loop (code: cheat sheet, “Sorting algorithms”). Separate the numbers with spaces or commas.',
+    body: 'Write down the array after each pass of the <strong>outer</strong> loop. Separate the numbers with spaces or commas.',
     parts: [{ kind: 'seqtable', start: '29 10 14 37 13', cols: ['SelectionSort', 'BubbleSort', 'InsertionSort'],
       rows: ['after pass 1', 'after pass 2', 'after pass 3'],
       answers: [['10 29 14 37 13', '10 14 29 13 37', '10 29 14 37 13'],
@@ -418,22 +536,22 @@ Average: 80.00`, codeLang: 'text',
                 ['10 13 14 37 29', '10 13 14 29 37', '10 14 29 37 13']] }],
     note: 'SelectionSort pass 3: 14 is already the smallest of the rest → it swaps with itself. InsertionSort pass 3: 37 is already in place.' },
   { id: 'D.2', section: 'D', title: 'Binary search',
-    body: '<code>int[] values = {3, 8, 15, 21, 34, 42, 57, 63, 78};</code> (indices 0–8), code: cheat sheet, “Big-O &amp; binary search”.',
+    body: '<code>int[] values = {3, 8, 15, 21, 34, 42, 57, 63, 78};</code> (indices 0–8).<br>Binary search compares the target with the middle element, <code>values[mid]</code>. If that is not the target, it keeps searching only the left or the right half. Trace each call by hand.',
     parts: [
-      { kind: 'seq', label: '(a) <code>binarySearch(values, 57)</code>: the numbers at <code>values[mid]</code>, in the order they are checked', answer: ['34', '57'] },
-      { kind: 'value', label: '(a) returns', answer: 6 },
-      { kind: 'seq', label: '(b) <code>binarySearch(values, 10)</code>: the numbers at <code>values[mid]</code>, in the order they are checked', answer: ['34', '8', '15'] },
-      { kind: 'value', label: '(b) returns', answer: -1 },
+      { kind: 'seq', label: '(a) <code>binarySearch(values, 57)</code>: list every <code>values[mid]</code> that is compared with 57, in order. Separate the numbers with spaces or commas.', answer: ['34', '57'] },
+      { kind: 'value', label: '(a) What does <code>binarySearch(values, 57)</code> return?', answer: 6 },
+      { kind: 'seq', label: '(b) <code>binarySearch(values, 10)</code>: list every <code>values[mid]</code> that is compared with 10, in order.', answer: ['34', '8', '15'] },
+      { kind: 'value', label: '(b) What does <code>binarySearch(values, 10)</code> return?', answer: -1 },
       { kind: 'choice', label: '(c) Why does binary search not work on <code>{8, 3, 21}</code>?',
         options: ['The array is too short.', 'The array is not sorted.', 'The length is odd.', '21 is too large.'], answer: 1 }],
     note: '(a) mid = (0 + 8) / 2 = 4 → 34; 57 &gt; 34 → left = 5; mid = (5 + 8) / 2 = 6 → 57. (b) 34 → 8 → 15, then left &gt; right → -1.' },
   { id: 'D.3', section: 'D', title: 'Big-O',
     body: 'Give the worst-case Big-O for an array <code>values</code> with <em>n</em> elements.',
     parts: [
-      { kind: 'choice', label: '(a) <code>int x = values[3];</code>', options: BIGO, answer: 0 },
-      { kind: 'choice', label: '(b) <code>for (int i = 0; i &lt; n; i++) { sum += values[i]; }</code>', options: BIGO, answer: 2 },
-      { kind: 'choice', label: '(c) <code>for (int i = 0; i &lt; n; i++) { for (int j = 0; j &lt; n; j++) { … } }</code>', options: BIGO, answer: 4 },
-      { kind: 'choice', label: '(d) <code>for (int i = n; i &gt; 1; i = i / 2) { … }</code>', options: BIGO, answer: 1 },
+      { kind: 'choice', label: '(a) <code>int value = values[3];</code>', options: BIGO, answer: 0 },
+      { kind: 'choice', label: '(b) <code>for (int i = 0; i &lt; values.length; i++) { sum += values[i]; }</code>', options: BIGO, answer: 2 },
+      { kind: 'choice', label: '(c) <code>for (int i = 0; i &lt; values.length; i++) { for (int j = 0; j &lt; values.length; j++) { … } }</code>', options: BIGO, answer: 4 },
+      { kind: 'choice', label: '(d) <code>for (int i = values.length; i &gt; 1; i = i / 2) { … }</code>', options: BIGO, answer: 1 },
       { kind: 'choice', label: '(e) two loops <strong>one after the other</strong>, each <code>i = 0</code> to <code>n - 1</code>', options: BIGO, answer: 2 }],
     note: '(e): n + n = 2n steps → constants do not count → O(n). Nested loops multiply, loops in a row add.' },
   { id: 'D.4', section: 'D', title: 'Stack & queue',
@@ -446,47 +564,47 @@ Average: 80.00`, codeLang: 'text',
   { id: 'D.5', section: 'D', title: 'What happens?',
     body: 'For each line: compile-time error, runtime error (which exception?), or logical error?',
     parts: [
-      { kind: 'choice', label: '(a) <code>int[] a = new int[3]; a[3] = 1;</code>', options: ERRORS, answer: 1 },
-      { kind: 'choice', label: '(b) <code>String name = null; int n = name.length();</code>', options: ERRORS, answer: 2 },
-      { kind: 'choice', label: '(c) <code>int x = 10 / 0;</code>', options: ERRORS, answer: 3 },
+      { kind: 'choice', label: '(a) <code>int[] numbers = new int[3]; numbers[3] = 1;</code>', options: ERRORS, answer: 1 },
+      { kind: 'choice', label: '(b) <code>String name = null; int length = name.length();</code>', options: ERRORS, answer: 2 },
+      { kind: 'choice', label: '(c) <code>int result = 10 / 0;</code>', options: ERRORS, answer: 3 },
       { kind: 'choice', label: '(d) <code>int age = scanner.nextInt();</code> and the user types <code>abc</code>', options: ERRORS, answer: 4 },
       { kind: 'choice', label: '(e) <code>int count = "5";</code>', options: ERRORS, answer: 0 },
       { kind: 'choice', label: '(f) <code>double avg = sum / count;</code> with <code>int sum = 7, count = 2</code> gives <code>3.0</code>', options: ERRORS, answer: 5 }],
     note: '(e): a <code>String</code> is not an <code>int</code> → the compiler rejects it. (f): int division → it runs, but the result is wrong.' },
   { id: 'D.6', section: 'D', title: 'What is the output?',
-    code: `String s = "java";
-s.toUpperCase();
-System.out.println(s);
-s = s.toUpperCase();
-System.out.println(s + 1 + 2);
-System.out.println(1 + 2 + s);
+    code: `String word = "java";
+word.toUpperCase();
+System.out.println(word);
+word = word.toUpperCase();
+System.out.println(word + 1 + 2);
+System.out.println(1 + 2 + word);
 
-int[] a = {1, 2, 3};
-int[] b = a;
-b[0] = 99;
-System.out.println(a[0]);
+int[] numbers = {1, 2, 3};
+int[] moreNumbers = numbers;
+moreNumbers[0] = 99;
+System.out.println(numbers[0]);
 
 try {
     System.out.println("A");
-    int x = 10 / 0;
+    int result = 10 / 0;
     System.out.println("B");
-} catch (ArithmeticException e) {
+} catch (ArithmeticException exception) {
     System.out.println("C");
 } finally {
     System.out.println("D");
 }`,
     parts: [{ kind: 'lines', label: 'Output (one line per <code>println</code>)', answer: ['java', 'JAVA12', '3JAVA', '99', 'A', 'C', 'D'] }],
-    note: 'Strings are immutable (line 2 changes nothing); <code>+</code> works left to right; <code>b</code> is an alias of <code>a</code>; <code>B</code> is skipped, <code>finally</code> always runs.' },
+    note: 'Strings are immutable (line 2 changes nothing); <code>+</code> works left to right; <code>moreNumbers</code> refers to the same array as <code>numbers</code>; <code>B</code> is skipped, <code>finally</code> always runs.' },
 
   // ------------------------------------------------------------------ E
   { id: 'E.1', section: 'E', title: 'From model (UML) … to code',
     body: 'Implement the class <code>Rectangle</code>.<ul><li><code>getArea()</code> returns width × height.</li><li><code>getPerimeter()</code> returns 2 × (width + height).</li><li><code>toString()</code> returns, e.g., <code>"Rectangle 3.0 x 4.5"</code>.</li></ul>',
     uml: { classes: [{ name: 'Rectangle', role: 'todo', tag: 'Implement', attrs: ['- width: double', '- height: double'],
       methods: ['+ Rectangle(width: double, height: double)', '+ getArea(): double', '+ getPerimeter(): double', '+ toString(): String'] }] },
-    code: `Rectangle r = new Rectangle(3.0, 4.5);
-System.out.println(r.getArea());       // 13.5
-System.out.println(r.getPerimeter());  // 15.0
-System.out.println(r);                 // Rectangle 3.0 x 4.5`,
+    code: `Rectangle rectangle = new Rectangle(3.0, 4.5);
+System.out.println(rectangle.getArea());       // 13.5
+System.out.println(rectangle.getPerimeter());  // 15.0
+System.out.println(rectangle);                 // Rectangle 3.0 x 4.5`,
     parts: [{ kind: 'code', starter: 'public class Rectangle {\n    \n}',
       solution: `public class Rectangle {
     private double width;
@@ -510,10 +628,10 @@ System.out.println(r);                 // Rectangle 3.0 x 4.5`,
       test: `// Main.java -- in the same folder as Rectangle.java
 public class Main {
     public static void main(String[] args) {
-        Rectangle r = new Rectangle(3.0, 4.5);
-        System.out.println(r.getArea() + "   (expected 13.5)");
-        System.out.println(r.getPerimeter() + "   (expected 15.0)");
-        System.out.println(r + "   (expected Rectangle 3.0 x 4.5)");
+        Rectangle rectangle = new Rectangle(3.0, 4.5);
+        System.out.println(rectangle.getArea() + "   (expected 13.5)");
+        System.out.println(rectangle.getPerimeter() + "   (expected 15.0)");
+        System.out.println(rectangle + "   (expected Rectangle 3.0 x 4.5)");
     }
 }` }] },
   { id: 'E.2', section: 'E', title: 'Inheritance & discount',
@@ -523,10 +641,10 @@ public class Main {
         methods: ['+ Product(name: String, price: double)', '+ getName(): String', '+ getPrice(): double', '+ calculateTotal(quantity: int): double'] },
       { name: 'BulkProduct', role: 'todo', tag: '(b) Implement', attrs: ['- minQuantity: int', '- discountRate: double'],
         methods: ['+ BulkProduct(name: String, price: double, minQuantity: int, discountRate: double)', '+ calculateTotal(quantity: int): double'] }] },
-    code: `BulkProduct p = new BulkProduct("Pens", 2.50, 10, 0.20);
-System.out.println(p.getPrice());          // 2.5
-System.out.println(p.calculateTotal(4));   // 10.0
-System.out.println(p.calculateTotal(10));  // 20.0`,
+    code: `BulkProduct pens = new BulkProduct("Pens", 2.50, 10, 0.20);
+System.out.println(pens.getPrice());          // 2.5
+System.out.println(pens.calculateTotal(4));   // 10.0
+System.out.println(pens.calculateTotal(10));  // 20.0`,
     vars: {},
     parts: [
       { kind: 'expr', mode: 'example', label: 'Step 1, by hand: 10 pens at $2.50, 20 % off (a Java expression with numbers)', expected: { type: 'double', v: 20.0 }, solution: '10 * 2.50 * (1 - 0.20)' },
@@ -566,11 +684,11 @@ public class BulkProduct extends Product {
         test: `// Main.java -- in the same folder as Product.java and BulkProduct.java
 public class Main {
     public static void main(String[] args) {
-        BulkProduct p = new BulkProduct("Pens", 2.50, 10, 0.20);
-        System.out.println(p.getPrice() + "   (expected 2.5)");
-        System.out.println(p.calculateTotal(4) + "   (expected 10.0)");
-        System.out.println(p.calculateTotal(10) + "   (expected 20.0)");
-        System.out.println(p.calculateTotal(9) + "   (expected 22.5)");
+        BulkProduct pens = new BulkProduct("Pens", 2.50, 10, 0.20);
+        System.out.println(pens.getPrice() + "   (expected 2.5)");
+        System.out.println(pens.calculateTotal(4) + "   (expected 10.0)");
+        System.out.println(pens.calculateTotal(10) + "   (expected 20.0)");
+        System.out.println(pens.calculateTotal(9) + "   (expected 22.5)");
     }
 }` }],
     note: 'Each public class goes into its own file: <code>Product.java</code>, <code>BulkProduct.java</code>.' },
@@ -581,13 +699,13 @@ public class Main {
         methods: ['+ Playlist(name: String)', '+ addSong(song: Song)', '+ getTotalSeconds(): int', '+ getLongest(): Song', '+ toString(): String'] },
       { name: 'Song', role: 'given', attrs: ['- title: String', '- seconds: int'],
         methods: ['+ Song(title: String, seconds: int)', '+ getTitle(): String', '+ getSeconds(): int'] }] },
-    code: `Playlist p = new Playlist("Run");
-p.addSong(new Song("Intro", 95));
-p.addSong(new Song("Speed", 210));
-p.addSong(new Song("Cool down", 180));
-System.out.println(p.getTotalSeconds());        // 485
-System.out.println(p.getLongest().getTitle());  // Speed
-System.out.println(p);                          // Run: 3 songs, 8 min 5 s`,
+    code: `Playlist playlist = new Playlist("Run");
+playlist.addSong(new Song("Intro", 95));
+playlist.addSong(new Song("Speed", 210));
+playlist.addSong(new Song("Cool down", 180));
+System.out.println(playlist.getTotalSeconds());        // 485
+System.out.println(playlist.getLongest().getTitle());  // Speed
+System.out.println(playlist);                          // Run: 3 songs, 8 min 5 s`,
     vars: { total: ['int', 485] },
     tests: [{ total: 61 }, { total: 59 }],
     parts: [
@@ -642,25 +760,25 @@ public class Playlist {
         test: `// Main.java -- in the same folder as Song.java and Playlist.java
 public class Main {
     public static void main(String[] args) {
-        Playlist p = new Playlist("Run");
-        System.out.println(p.getLongest() + "   (expected null)");
-        p.addSong(new Song("Intro", 95));
-        p.addSong(new Song("Speed", 210));
-        p.addSong(new Song("Cool down", 180));
-        System.out.println(p.getTotalSeconds() + "   (expected 485)");
-        System.out.println(p.getLongest().getTitle() + "   (expected Speed)");
-        System.out.println(p + "   (expected Run: 3 songs, 8 min 5 s)");
+        Playlist playlist = new Playlist("Run");
+        System.out.println(playlist.getLongest() + "   (expected null)");
+        playlist.addSong(new Song("Intro", 95));
+        playlist.addSong(new Song("Speed", 210));
+        playlist.addSong(new Song("Cool down", 180));
+        System.out.println(playlist.getTotalSeconds() + "   (expected 485)");
+        System.out.println(playlist.getLongest().getTitle() + "   (expected Speed)");
+        System.out.println(playlist + "   (expected Run: 3 songs, 8 min 5 s)");
     }
 }` }] },
   { id: 'E.4', section: 'E', title: 'static: one counter for all objects',
     body: 'Implement <code>Member</code>:<ul><li><code>memberCount</code> counts all <code>Member</code> objects ever created.</li><li>Every member gets the next number: the first member is <code>1</code>, the second <code>2</code>, …</li><li><code>toString()</code> returns, e.g., <code>"#2 Bo"</code>.</li><li><u>Underlined</u> in UML → <code>static</code></li></ul>',
     uml: { classes: [{ name: 'Member', role: 'todo', tag: 'Implement', attrs: ['_- memberCount: int', '- name: String', '- number: int'],
       methods: ['+ Member(name: String)', '+ getNumber(): int', '_+ getMemberCount(): int', '+ toString(): String'] }] },
-    code: `Member m1 = new Member("Ana");
-Member m2 = new Member("Bo");
-System.out.println(m2);                      // #2 Bo
-System.out.println(m1.getNumber());          // 1
-System.out.println(Member.getMemberCount()); // 2`,
+    code: `Member ana = new Member("Ana");
+Member bo = new Member("Bo");
+System.out.println(bo);                       // #2 Bo
+System.out.println(ana.getNumber());          // 1
+System.out.println(Member.getMemberCount());  // 2`,
     parts: [{ kind: 'code', starter: 'public class Member {\n    \n}',
       solution: `public class Member {
     private static int memberCount = 0;    // ONE value for the whole class
@@ -679,15 +797,15 @@ System.out.println(Member.getMemberCount()); // 2`,
       test: `// Main.java -- in the same folder as Member.java
 public class Main {
     public static void main(String[] args) {
-        Member m1 = new Member("Ana");
-        Member m2 = new Member("Bo");
-        System.out.println(m2 + "   (expected #2 Bo)");
-        System.out.println(m1.getNumber() + "   (expected 1)");
+        Member ana = new Member("Ana");
+        Member bo = new Member("Bo");
+        System.out.println(bo + "   (expected #2 Bo)");
+        System.out.println(ana.getNumber() + "   (expected 1)");
         System.out.println(Member.getMemberCount() + "   (expected 2)");
     }
 }` }],
     note: 'If <code>memberCount</code> were not <code>static</code>, every member would have its own counter → every member would be #1.' },
-  { id: 'E.5', section: 'E', title: 'From code … to model (UML)',
+  { id: 'E.5', section: 'E', title: 'Inherited methods',
     code: `public class Account {
     private String owner;
     protected double balance;
@@ -703,22 +821,69 @@ public class SavingsAccount extends Account {
     public void addInterest() { balance += balance * interestRate; }
 }`,
     parts: [
-      { kind: 'paper', label: '(a) Draw the annotated UML class diagram for both classes (including the inheritance arrow) on paper.',
-        solutionUml: { layout: 'extends', classes: [
-          { name: 'Account', attrs: ['- owner: String', '# balance: double', '_- count: int'],
-            methods: ['+ Account(owner: String, balance: double)', '+ deposit(amount: double)', '+ getBalance(): double', '_+ getCount(): int'] },
-          { name: 'SavingsAccount', attrs: ['- interestRate: double'],
-            methods: ['+ SavingsAccount(owner: String, balance: double, interestRate: double)', '+ addInterest()'] }] },
-        solutionNote: '<code>protected</code> is <code>#</code>; <code>static</code> is underlined; <code>void</code> methods show no return type; the subclass box shows only what is new.' },
-      { kind: 'value', label: '(b) <code>SavingsAccount s = new SavingsAccount("Ana", 200.0, 0.05);</code><br>After calling <code>s.addInterest()</code> once, <code>s.getBalance()</code> returns', answer: 210.0 },
+      { kind: 'value', label: '(a) <code>SavingsAccount account = new SavingsAccount("Ana", 200.0, 0.05);</code><br>After calling <code>account.addInterest()</code> once, <code>account.getBalance()</code> returns', answer: 210.0 },
       { kind: 'value', label: '(b) … after a second call, it returns', answer: 220.5 }],
     note: 'Second call: <code>210.0 + 210.0 * 0.05 = 210.0 + 10.5</code>. The interest is computed on the <em>new</em> balance.' },
 
+  { id: 'E.6', section: 'E', title: 'From a description: exceptions',
+    body: 'Implement <code>BankAccount</code> from this description:<ul><li>Each account has an owner (a <code>String</code>) and a balance (a <code>double</code>). Both are private.</li><li>The constructor takes the owner. A new account has a balance of <code>0.0</code>.</li><li><code>getBalance()</code> returns the balance, and <code>deposit(amount)</code> adds to it.</li><li><code>withdraw(amount)</code> subtracts from the balance. If the amount is larger than the balance, it throws an <code>IllegalArgumentException</code> with the message <code>"Not enough money"</code> and does not change the balance.</li></ul>',
+    parts: [
+      { kind: 'code', label: '(a) The class <code>BankAccount</code>', starter: 'public class BankAccount {\n    \n}',
+        solution: `public class BankAccount {
+    private String owner;
+    private double balance;
+
+    public BankAccount(String owner) {
+        this.owner = owner;
+        balance = 0.0;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void deposit(double amount) {
+        balance += amount;
+    }
+
+    public void withdraw(double amount) {
+        if (amount > balance) {
+            throw new IllegalArgumentException("Not enough money");
+        }
+        balance -= amount;                 // not reached after throw
+    }
+}`,
+        test: `// Main.java -- in the same folder as BankAccount.java
+public class Main {
+    public static void main(String[] args) {
+        BankAccount account = new BankAccount("Ana");
+        account.deposit(100.0);
+        account.withdraw(30.0);
+        System.out.println(account.getBalance() + "   (expected 70.0)");
+        account.withdraw(500.0);           // expected: the program stops with
+                                           // IllegalArgumentException: Not enough money
+    }
+}` },
+      { kind: 'code', label: '(b) A <code>main</code> method: create an account for Ana, deposit 100.0, and try to withdraw 500.0. Catch the exception and print <code>Error: </code> followed by its message. Then print the balance.',
+        starter: 'public static void main(String[] args) {\n    \n}',
+        solution: `public static void main(String[] args) {
+    BankAccount account = new BankAccount("Ana");
+    account.deposit(100.0);
+    try {
+        account.withdraw(500.0);
+        System.out.println("Withdrawn");   // skipped: withdraw threw
+    } catch (IllegalArgumentException exception) {
+        System.out.println("Error: " + exception.getMessage());
+    }
+    System.out.println(account.getBalance());
+}`,
+        testNote: 'Run it in VS Code. It should print <code>Error: Not enough money</code> and then <code>100.0</code>.' }],
+    note: '<code>throw</code> ends the method right away, like <code>return</code>. The caller decides what happens next: without <code>try</code>/<code>catch</code>, the program stops.' },
   // ------------------------------------------------------------------ F
   { id: 'F.1', section: 'F',
     code: `public static double average(int[] values) {
     int sum = 0;
-    for (int v : values) { sum += v; }
+    for (int value : values) { sum += value; }
     return sum / values.length;            // {3, 8, 1, 6} gives 4.0, not 4.5
 }`,
     parts: [
@@ -759,7 +924,7 @@ public double discountedPrice(double price, double rate) {
     note: '<code>grid[0].length</code> works only if all rows have the same length; <code>grid[i].length</code> always works.' },
   { id: 'F.5', section: 'F',
     code: `public class StudentTicket extends Ticket {
-    // ... attribute and constructor: see the cheat sheet ...
+    // ... attribute and constructor omitted ...
     @Override
     public double calculatePrice() {
         return calculatePrice() * (1 - discountRate);   // StackOverflowError

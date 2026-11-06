@@ -1,5 +1,4 @@
 # Publishes web/ to GitHub Pages on every push to main.
-# The catch-up PDFs and the .tex are not in this repo and are never published.
 name: Publish practice website
 
 on:

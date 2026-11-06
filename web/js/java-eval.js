@@ -257,7 +257,7 @@
             if (name.v === 'length' && !call) throw new JavaError('Strings have length() with () → .length (no parentheses) is for arrays.');
             if (name.v === 'size') throw new JavaError('size() is for ArrayLists. Strings have length().');
             const m = STRING_METHODS[name.v];
-            if (!m) throw new JavaError(`String.${name.v}(...) is not covered here. Use the methods from the cheat sheet.`);
+            if (!m) throw new JavaError(`String.${name.v}(...) is not covered here. Use one of these: ${Object.keys(STRING_METHODS).join('(), ')}().`);
             if (!call) throw new JavaError(`${name.v} is a method → ${name.v}(...)`);
             const a = args();
             if (a.length !== m.n) throw new JavaError(`${name.v}(...) takes ${m.n} argument${m.n === 1 ? '' : 's'}.`);

@@ -62,8 +62,30 @@
         }
       }
       state.bNoExample = true;
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
     }
+    // E.5 lost its first part (drawing the UML diagram on paper): shift saved parts down by one.
+    if (!state.e5NoDrawing) {
+      for (const m of [state.answers, state.results]) {
+        delete m['E.5#0'];
+        for (const n of [1, 2]) if (('E.5#' + n) in m) { m['E.5#' + (n - 1)] = m['E.5#' + n]; delete m['E.5#' + n]; }
+      }
+      state.e5NoDrawing = true;
+    }
+    // New exercises C.6–C.9 and C.12: the old C.6, C.7, C.8 are now C.10, C.11, C.13.
+    if (!state.cRenumbered) {
+      for (const m of [state.answers, state.results]) {
+        for (const [from, to] of [['C.8', 'C.13'], ['C.7', 'C.11'], ['C.6', 'C.10']]) {
+          for (const k of Object.keys(m)) if (k.startsWith(from + '#')) { m[to + k.slice(from.length)] = m[k]; delete m[k]; }
+        }
+      }
+      state.cRenumbered = true;
+    }
+    // B.2 was replaced by a new exercise: drop old saved answers for it.
+    if (!state.b2Replaced) {
+      delete state.answers['B.2#0']; delete state.results['B.2#0'];
+      state.b2Replaced = true;
+    }
+    if (saved) { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ } }
   } catch (e) { /* private mode: progress lives only in this tab */ }
   let saveTimer = null;
   function save() {
@@ -150,10 +172,14 @@
 
   // ------------------------------------------------------------ checking
   // spacing is ignored; a trailing ; or { is optional
+  // (text inside "..." and '...' is kept exactly as typed)
   function normLine(s) {
-    return s.trim().replace(/\s+/g, ' ')
+    const literals = [];
+    const code = s.replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, lit => `\u0000${literals.push(lit) - 1}\u0000`);
+    return code.trim().replace(/\s+/g, ' ')
       .replace(/ ?([^\w\s$]) ?/g, '$1')
-      .replace(/[;{\s]+$/, '');
+      .replace(/[;{\s]+$/, '')
+      .replace(/\u0000(\d+)\u0000/g, (_, i) => literals[i]);
   }
 
   function envFrom(vars, values = {}) {
@@ -205,6 +231,9 @@
         }
         // vars / statement: same result as the sample solution for the given values AND the test values
         const envs = [given, ...(ex.tests || []).map(t => envFrom(ex.vars, t))];
+        if (part.declare && !/^\s*(int|double|boolean|String|char|long)\s+[A-Za-z_]/.test(value)) {
+          return { status: 'bad', html: `The task asks for a <strong>new</strong> variable. A declaration starts with its type: <code>${part.declare} ${part.target} = …;</code>` };
+        }
         let usedAny = false;
         for (const env of envs) {
           const expected = evaluate(ref, env).value;
@@ -213,6 +242,12 @@
             if (env === given || !(e instanceof window.JavaEval.JavaError)) throw e;
             const fixed = /ArrayIndexOutOfBounds/.test(e.message) ? ' Is there a fixed index that should depend on <code>.length</code>?' : '';
             return { status: 'bad', html: `It works for the given values, but with ${describeEnv(env)} it crashes: ${esc(e.message)}${fixed}` };
+          }
+          if (part.declare && got.declared && got.assignTo === part.target && got.declared !== part.declare) {
+            return { status: 'bad', html: `This declares a <code>${esc(got.declared)}</code> variable. The task asks for an <code>${part.declare}</code>.` };
+          }
+          if (part.declare && got.statement && got.assignTo !== part.target) {
+            return { status: 'bad', html: `This declares <code>${esc(got.assignTo)}</code>. The task asks for a variable named <code>${part.target}</code>.` };
           }
           if (part.mode === 'statement' && got.assignTo !== part.target) {
             return { status: 'bad', html: got.statement
@@ -232,6 +267,9 @@
         }
         return { status: 'ok', html: `It also works with ${describeEnv(envFrom(ex.vars, (ex.tests || [])[0]))}.` };
       } catch (e) {
+        if (e instanceof window.JavaEval.JavaError && /is not covered here/.test(e.message)) {
+          return { status: 'review', html: `This checker cannot run <code>${esc(e.message.replace(/ is not covered here.*/, ''))}</code>, but your answer may still be right.` };
+        }
         if (e instanceof window.JavaEval.JavaError) return { status: 'bad', html: `This does not work in Java: ${esc(e.message)}` };
         throw e;
       }
@@ -575,14 +613,14 @@
     const intro = el('section', 'intro');
     intro.innerHTML = `
       <h1>Catch-up practice</h1>
-      <p>Practice for every topic of Midterm 1 and Midterm 2, from single lines of Java to exam-level questions.
+      <p>Practice for the topics of the first half of the course, from single lines of Java to whole methods and classes.
         For explanations and examples, use the <a href="https://pitt-0401.github.io/java-foundations/">Java Foundations</a> pages.</p>
       <div class="howto">
         <h2>How to use this page</h2>
         <ol>
           <li>Pick a section and solve each exercise on your own first, on paper or in your head.</li>
           <li>Type your answer and press <kbd>Check</kbd>. Short answers are checked right away. For methods and classes, compare your code with the sample solution and test it in VS Code.</li>
-          <li>If you are stuck, go back to the matching page in Java Foundations. A wrong attempt teaches you more than an empty answer.</li>
+          <li>Stuck? Reread the topic in Java Foundations and try again. Even a wrong answer helps: the feedback shows you what to fix.</li>
         </ol>
         <p class="small">Your answers and progress are saved in this browser only. Nothing is sent anywhere.</p>
       </div>`;
@@ -603,7 +641,7 @@
     main.appendChild(secs);
 
     const check = el('section', 'checklist');
-    check.innerHTML = '<h2>Checklist: Midterm 1 and 2 topics</h2><p>Check off what you can do without notes.</p>';
+    check.innerHTML = '<h2>Checklist</h2><p>Check off what you can do without notes.</p>';
     const items = el('ul');
     CHECKLIST.forEach((item, i) => {
       const li = el('li');

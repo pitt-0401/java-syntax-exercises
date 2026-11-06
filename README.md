@@ -4,7 +4,7 @@
 
 **Website:** <https://pitt-0401.github.io/java-syntax-exercises/>. Start there.
 
-A static website for the practice part (Part 2) of the catch-up pack: students can work on each exercise on their own and check their answers.
+A static website with Java practice exercises: students work on each exercise on their own and check their answers.
 
 No build step and no dependencies: plain HTML, CSS, and JavaScript. Answers and progress are saved in the student's browser (`localStorage`). Nothing is sent anywhere.
 
@@ -14,7 +14,6 @@ No build step and no dependencies: plain HTML, CSS, and JavaScript. Answers and 
 | `web/js/exercises.js` | **All exercises, answers, and solutions.** Edit this file to change an exercise. |
 | `web/js/java-eval.js` | Small evaluator for Java expressions (int/double/boolean, int division, casts) used to check Part B |
 | `web/js/app.js` | Rendering, checking, and progress |
-| `make.sh` | Builds the printed catch-up pack from `catch-up.tex` (one folder above this repository). Its output stays outside the repository and is not published. |
 
 The site follows the design of the companion site, Java Foundations
 (<https://pitt-0401.github.io/java-foundations/>): same fonts, colors, code
@@ -28,16 +27,12 @@ its link in `index.html`, so browsers load the new version.
 
 | Section | Check |
 |---|---|
-| A, C.7(a), F (corrected line) | Compared with the accepted answers. Spacing does not matter, and the final `;` / `{` is optional. Known mistakes such as `new int[4][3]` or `answer == "yes"` get a targeted message. Any other answer: the student compares it with the sample solution and marks it themselves. |
-| B, E.2 step 1 | The expression is **evaluated** with the given values *and* with other values (step 1 of E.2 uses only the given numbers). This catches int division, hard-coded numbers, and a missing assignment (B.9). |
+| A, C.11(b), F (corrected or missing line) | Compared with the accepted answers. Spacing does not matter, and the final `;` / `{` is optional. Known mistakes such as `title = title;` or `new int[names.length]` get a targeted message. Any other answer: the student compares it with the sample solution and marks it themselves. |
+| B, E.2 step 1 | The expression is **evaluated** with the given values *and* with other values (step 1 of E.2 uses only the given numbers). This catches int division, hard-coded numbers, and a missing assignment (B.10). |
 | D | Number lists, choices, and output lines are compared exactly. |
-| C, E (code), F (explanation), E.5(a) | The student compares with the sample solution and marks it themselves. C and E come with a test file for VS Code that prints `actual   (expected …)`. |
+| C, E (code), F (explanation) | The student compares with the sample solution and marks it themselves. C and E come with a test file for VS Code that prints `actual   (expected …)`. |
 
 Every sample solution was compiled and run with its test file.
-
-## Keep it in sync with `catch-up.tex`
-
-`web/js/exercises.js` is a separate copy of Part 2 of `catch-up.tex`, which is one folder above this repository. When you change an exercise in the `.tex`, change it here too, then run `./make.sh` to rebuild the printed pack.
 
 ## Publishing
 

@@ -1,6 +1,3 @@
-# LaTeX helper files from ./make.sh
-build/
-
 # Editor and OS files
 .idea/
 .vscode/

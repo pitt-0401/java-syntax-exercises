@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Catch-up practice · CMPINF 0401</title>
-  <meta name="description" content="Self-study practice for all Midterm 1 and Midterm 2 topics of CMPINF 0401.">
+  <meta name="description" content="Self-study Java practice for CMPINF 0401.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%232b4fa3'/><text x='50' y='72' font-family='monospace' font-size='64' font-weight='700' fill='white' text-anchor='middle'>{}</text></svg>">
   <script>
     // Apply a saved light/dark choice before first paint (no flash). See theme code in js/app.js.
@@ -14,18 +14,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=28">
 </head>
 <body>
   <header class="topbar">
-    <button id="menu-btn" class="menu-btn" type="button" aria-label="Show all exercises">☰</button>
-    <a class="brand" href="#/">Catch-up practice <span>CMPINF 0401 · Midterm 1 and 2</span></a>
+   <div class="topbar-inner">
+    <a class="logo" href="#/" aria-label="Catch-up practice: overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg></a>
+    <button id="menu-btn" class="menu-btn" type="button" aria-label="Show all exercises"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg></button>
+    <a class="brand" href="#/">Catch-up practice</a>
+    <span class="beta-badge">Beta<span class="beta-long"> version</span></span>
+    <span class="brand-sub">CMPINF 0401</span>
     <div class="top-progress" aria-live="polite">
       <div class="bar"><div id="progress-bar"></div></div>
       <span id="progress-text"></span>
     </div>
     <a class="top-link" href="https://pitt-0401.github.io/java-foundations/">Java Foundations</a>
     <button id="theme-btn" class="theme-btn" type="button" aria-label="Theme: system" title="Theme: system"></button>
+   </div>
   </header>
   <div class="layout">
     <nav id="nav" class="sidebar" aria-label="Exercises"></nav>
@@ -41,8 +46,8 @@
     </div>
   </footer>
   <noscript><p style="padding:2rem">This practice page needs JavaScript.</p></noscript>
-  <script src="js/java-eval.js?v=11"></script>
-  <script src="js/exercises.js?v=11"></script>
-  <script src="js/app.js?v=11"></script>
+  <script src="js/java-eval.js?v=28"></script>
+  <script src="js/exercises.js?v=28"></script>
+  <script src="js/app.js?v=28"></script>
 </body>
 </html>

@@ -1,7 +1,6 @@
 # AGENTS.md: catch-up practice
 
-This repository is the practice website for Part 2 of the catch-up pack. It is a
-companion to Java Foundations (<https://github.com/pitt-0401/java-foundations>)
+This repository is a website with Java practice exercises. It is a companion to Java Foundations (<https://github.com/pitt-0401/java-foundations>)
 and follows that project's rules. Read its `AGENTS.md` (writing, accessibility,
 workflow) and `docs/design-guidelines.md` (visual design) before changing
 student-facing text or styles. This file lists only what is different here.
@@ -10,9 +9,6 @@ student-facing text or styles. This file lists only what is different here.
 
 - **Stack:** plain HTML, CSS, and JavaScript in `web/`, with no build step and no
   dependencies. Do not add a framework or a bundler.
-- **Source of truth:** `web/js/exercises.js` is a copy of Part 2 of
-  `catch-up.tex` (one folder above this repository, not committed). Change an
-  exercise in both places. See `README.md`.
 - **Styles:** `web/style.css` uses the Foundations token names and values
   (`--jf-*`). Do not invent new colors; add a token from Foundations' `extra.css`
   instead, and change a token in both repositories.
@@ -31,6 +27,13 @@ The Foundations writing rules apply: plain, direct sentences, contractions
 spelled out ("does not"), no em dashes, no decorative emoji, sentence case for
 titles. Feedback starts with a bold label: **✓ Correct.**, **✗ Incorrect.**, or
 **Compare with the solution.**
+
+Names in code use whole words (`word`, `numbers`, `exception`), never single
+letters or abbreviations; only `i` and `j` as loop counters. When the student has
+to work out what code does, the names must not give the answer away: call the
+method `mystery` and use neutral variable names. Lists of accepted answers may
+still include common short names (such as `e` in a `catch`) so students are not
+marked wrong for them.
 
 ## Checks
 
