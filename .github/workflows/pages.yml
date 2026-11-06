@@ -1,5 +1,5 @@
 # Publishes web/ to GitHub Pages on every push to main.
-# web/catch-up.pdf is committed (built locally by ./make.sh) -- the .tex is not in this repo.
+# The catch-up PDFs and the .tex are not in this repo and are never published.
 name: Publish practice website
 
 on:
@@ -47,9 +47,9 @@ jobs:
             console.log(EXERCISES.length, "exercises,", bad, "problems");
             process.exit(bad ? 1 : 0);
           '
-      - name: Cheat sheet is the student PDF only
+      - name: No PDFs or solutions files are published
         run: |
-          test -f web/catch-up.pdf || { echo "web/catch-up.pdf is missing -- run ./make.sh"; exit 1; }
+          if find web -iname '*.pdf' | grep .; then echo "A PDF is in web/ -- remove it"; exit 1; fi
           if ls web | grep -i solution; then echo "A solutions file is in web/ -- remove it"; exit 1; fi
 
   deploy:

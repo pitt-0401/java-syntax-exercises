@@ -1,8 +1,43 @@
+// Theme button (System -> Light -> Dark). Kept separate from the app below so it
+// works even if the exercise code fails to load. index.html <head> applies the
+// saved choice before first paint; this only handles clicks.
+(function () {
+  'use strict';
+  const KEY = 'cmpinf0401-theme';
+  const MODES = ['system', 'light', 'dark'];
+  // The Material icons of the Foundations palette toggle (brightness-auto, -7, -4).
+  const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+  const ICON = {
+    system: svg('m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z'),
+    light: svg('M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z'),
+    dark: svg('M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z'),
+  };
+  const btn = document.getElementById('theme-btn');
+  if (!btn) return;
+  const root = document.documentElement;
+  const current = () => (MODES.includes(root.getAttribute('data-theme')) ? root.getAttribute('data-theme') : 'system');
+  function apply(mode) {
+    if (mode === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', mode);
+    const label = `Theme: ${mode} (click to change)`;
+    btn.innerHTML = ICON[mode];
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  }
+  btn.addEventListener('click', () => {
+    const next = MODES[(MODES.indexOf(current()) + 1) % MODES.length];
+    apply(next);
+    try {
+      if (next === 'system') localStorage.removeItem(KEY); else localStorage.setItem(KEY, next);
+    } catch (e) { /* storage blocked: choice lasts for this page view */ }
+  });
+  apply(current());
+})();
+
 // Catch-up practice: renders SECTIONS / EXERCISES (exercises.js), checks answers,
 // and remembers answers + progress in this browser (localStorage).
 (function () {
   'use strict';
-  const { evaluate, format, sameValue } = window.JavaEval;
+  const { evaluate, format, display, sameValue } = window.JavaEval;
   const SECTIONS = window.SECTIONS;
   const EXERCISES = window.EXERCISES;
   const STORE_KEY = 'cmpinf0401-catchup-v1';
@@ -12,6 +47,23 @@
   try {
     const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
     if (saved) state = { ...state, ...saved };
+    // Section B used to have an Example part before the variables part.
+    // Move saved answers from part 1 to part 0 once.
+    if (!state.bNoExample) {
+      for (const m of [state.answers, state.results]) {
+        for (const k of Object.keys(m)) {
+          if (!/^B\.\d+#0$/.test(k)) continue;
+          const k1 = k.replace('#0', '#1');
+          if (k1 in m) m[k] = m[k1]; else delete m[k];
+          delete m[k1];
+        }
+        for (const k of Object.keys(m)) {
+          if (/^B\.\d+#1$/.test(k)) { m[k.replace('#1', '#0')] = m[k]; delete m[k]; }
+        }
+      }
+      state.bNoExample = true;
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+    }
   } catch (e) { /* private mode: progress lives only in this tab */ }
   let saveTimer = null;
   function save() {
@@ -44,7 +96,7 @@
       if (str || chr) return `<span class="tk-s">${esc(m)}</span>`;
       if (ann) return `<span class="tk-a">${esc(ann)}</span>`;
       if (num) return `<span class="tk-n">${num}</span>`;
-      if (id) return KW.has(id) ? `<span class="tk-k">${id}</span>` : /^[A-Z]/.test(id) ? `<span class="tk-t">${id}</span>` : id;
+      if (id) return KW.has(id) ? `<span class="tk-k">${id}</span>` : id;
       return esc(other);
     });
   }
@@ -62,14 +114,14 @@
       try { document.execCommand('copy'); } catch (e2) { /* ignore */ }
       ta.remove();
     }
-    const old = btn.textContent; btn.textContent = 'Copied ✓';
+    const old = btn.textContent; btn.textContent = 'Copied';
     setTimeout(() => { btn.textContent = old; }, 1200);
   }
 
   // ------------------------------------------------------------ UML
   function umlClass(c) {
     const box = el('div', 'uml-class' + (c.role ? ' ' + c.role : ''));
-    if (c.tag || c.role === 'given') box.appendChild(el('span', 'uml-tag', c.tag ? '✎ ' + esc(c.tag) : 'given'));
+    if (c.tag || c.role === 'given') box.appendChild(el('span', 'uml-tag', c.tag ? esc(c.tag) : 'given'));
     box.appendChild(el('div', 'uml-name', esc(c.name)));
     const member = (m, hl) => {
       const isStatic = m.startsWith('_');
@@ -113,11 +165,11 @@
     return env;
   }
   function describeEnv(env) {
-    return Object.entries(env).map(([n, x]) => `<code>${n} = ${esc(format(x))}</code>`).join(', ');
+    return Object.entries(env).map(([n, x]) => `<code>${n} = ${esc(display(x))}</code>`).join(', ');
   }
   function intDivHint(got, expected) {
     if (got.type === 'int' && expected.type === 'double' && !sameValue(got, expected)) {
-      return ' Your result is an <code>int</code> — int division? Use <code>100.0</code> or a cast.';
+      return ' Your result is an <code>int</code>. Is this integer division? Use <code>100.0</code> or a cast.';
     }
     return '';
   }
@@ -131,9 +183,9 @@
       if (w) return { status: 'bad', html: w.msg };
       if (part.answers.some(a => normLine(a) === v)) {
         const needsSemi = /;\s*$/.test(part.solution) && !/;\s*$/.test(value);
-        return { status: 'ok', html: 'Correct!' + (needsSemi ? ' Don’t forget the <code>;</code> at the end of a statement.' : '') };
+        return { status: 'ok', html: needsSemi ? 'Do not forget the <code>;</code> at the end of a statement.' : '' };
       }
-      return { status: 'review', html: 'Not the same as the model answer — yours may still be right. Compare:' };
+      return { status: 'review', html: 'Your answer is different from the sample solution, but it may still be right. Compare the two:' };
     },
 
     expr(ex, part, value) {
@@ -145,34 +197,40 @@
           const expected = part.expected || evaluate(ref, given).value;
           const got = evaluate(value, given);
           if (!sameValue(got.value, expected)) {
-            return { status: 'bad', html: `Your expression gives <code>${esc(format(got.value))}</code> — expected <code>${esc(format(expected))}</code>.` + intDivHint(got.value, expected) };
+            return { status: 'bad', html: `Your expression gives <code>${esc(display(got.value))}</code>; expected <code>${esc(display(expected))}</code>.` + intDivHint(got.value, expected) };
           }
-          const tip = got.usedVars.size ? ' (In this step, write it with the numbers — variables come next.)' : '';
-          return { status: 'ok', html: `Correct: <code>${esc(format(got.value))}</code>.` + tip };
+          const numbersOnly = Object.values(ex.vars || {}).every(([t]) => t === 'int' || t === 'double');
+          const tip = got.usedVars.size && numbersOnly ? ' (In this step, write it with the numbers. Variables come next.)' : '';
+          return { status: 'ok', html: `The result is <code>${esc(display(got.value))}</code>.` + tip };
         }
-        // vars / statement: same result as the model answer for the given values AND the test values
+        // vars / statement: same result as the sample solution for the given values AND the test values
         const envs = [given, ...(ex.tests || []).map(t => envFrom(ex.vars, t))];
         let usedAny = false;
         for (const env of envs) {
           const expected = evaluate(ref, env).value;
-          const got = evaluate(value, env);
+          let got;
+          try { got = evaluate(value, env); } catch (e) {
+            if (env === given || !(e instanceof window.JavaEval.JavaError)) throw e;
+            const fixed = /ArrayIndexOutOfBounds/.test(e.message) ? ' Is there a fixed index that should depend on <code>.length</code>?' : '';
+            return { status: 'bad', html: `It works for the given values, but with ${describeEnv(env)} it crashes: ${esc(e.message)}${fixed}` };
+          }
           if (part.mode === 'statement' && got.assignTo !== part.target) {
             return { status: 'bad', html: got.statement
               ? `This stores the result in <code>${esc(got.assignTo)}</code>. The task: change <code>${part.target}</code> itself.`
-              : `This computes the new value — and then throws it away. Store it: <code>${part.target} = …;</code>` };
+              : `This computes the new value and then throws it away. Store it: <code>${part.target} = …;</code>` };
           }
           if (got.usedVars.size) usedAny = true;
           if (!sameValue(got.value, expected)) {
-            const where = env === given ? 'With the example values' : `With ${describeEnv(env)}`;
+            const where = env === given ? 'With the given values' : `With ${describeEnv(env)}`;
             const onlyExample = env !== given && !intDivHint(got.value, expected)
-              ? ' It works for the example, but not for other values → is a number in it that should be a variable?' : '';
-            return { status: 'bad', html: `${where}, your expression gives <code>${esc(format(got.value))}</code> — expected <code>${esc(format(expected))}</code>.` + intDivHint(got.value, expected) + onlyExample };
+              ? ' It works for the given values, but not for other values. Is there a fixed number or index that should come from a variable?' : '';
+            return { status: 'bad', html: `${where}, your expression gives <code>${esc(display(got.value))}</code>; expected <code>${esc(display(expected))}</code>.` + intDivHint(got.value, expected) + onlyExample };
           }
         }
         if (!usedAny && Object.keys(ex.vars || {}).length) {
-          return { status: 'bad', html: `This uses no variables → it only works for the example. Use ${Object.keys(ex.vars).map(n => `<code>${n}</code>`).join(', ')}.` };
+          return { status: 'bad', html: `This uses no variables, so it only works for the given values. Use ${Object.keys(ex.vars).map(n => `<code>${n}</code>`).join(', ')}.` };
         }
-        return { status: 'ok', html: `Correct — also with ${describeEnv(envFrom(ex.vars, (ex.tests || [])[0]))}.` };
+        return { status: 'ok', html: `It also works with ${describeEnv(envFrom(ex.vars, (ex.tests || [])[0]))}.` };
       } catch (e) {
         if (e instanceof window.JavaEval.JavaError) return { status: 'bad', html: `This does not work in Java: ${esc(e.message)}` };
         throw e;
@@ -185,17 +243,17 @@
       if (typeof part.answer === 'number') {
         const n = Number(v.replace(/[dD]$/, ''));
         if (Number.isNaN(n)) return { status: 'bad', html: 'Enter a number.' };
-        return Math.abs(n - part.answer) < 1e-9 ? { status: 'ok', html: 'Correct!' } : { status: 'bad', html: 'Not quite — trace it again step by step.' };
+        return Math.abs(n - part.answer) < 1e-9 ? { status: 'ok', html: '' } : { status: 'bad', html: 'Trace it again step by step.' };
       }
-      return v.toLowerCase() === String(part.answer).toLowerCase() ? { status: 'ok', html: 'Correct!' } : { status: 'bad', html: 'Not quite.' };
+      return v.toLowerCase() === String(part.answer).toLowerCase() ? { status: 'ok', html: '' } : { status: 'bad', html: '' };
     },
 
     seq(ex, part, value) {
       const got = splitSeq(value);
       if (!got.length) return null;
-      if (got.join(' ') === part.answer.join(' ')) return { status: 'ok', html: 'Correct!' };
-      if (got.length !== part.answer.length) return { status: 'bad', html: `Not quite — expected ${part.answer.length} value${part.answer.length > 1 ? 's' : ''}, you have ${got.length}.` };
-      return { status: 'bad', html: 'Not quite — trace it again step by step.' };
+      if (got.join(' ') === part.answer.join(' ')) return { status: 'ok', html: '' };
+      if (got.length !== part.answer.length) return { status: 'bad', html: `Expected ${part.answer.length} value${part.answer.length > 1 ? 's' : ''}, you have ${got.length}.` };
+      return { status: 'bad', html: 'Trace it again step by step.' };
     },
 
     seqtable(ex, part, value) {
@@ -208,13 +266,13 @@
         if (got.join(' ') === splitSeq(ans).join(' ')) right++;
       }));
       if (!filled) return null;
-      if (right === total) return { status: 'ok', html: 'All correct!' };
-      return { status: 'bad', html: `${right} of ${total} correct — the wrong cells are marked.` };
+      if (right === total) return { status: 'ok', html: 'Every cell is right.' };
+      return { status: 'bad', html: `${right} of ${total} cells are right. The wrong cells are marked.` };
     },
 
     choice(ex, part, value) {
       if (value == null || value === '') return null;
-      return Number(value) === part.answer ? { status: 'ok', html: 'Correct!' } : { status: 'bad', html: 'Not quite.' };
+      return Number(value) === part.answer ? { status: 'ok', html: '' } : { status: 'bad', html: '' };
     },
 
     lines(ex, part, value) {
@@ -224,8 +282,8 @@
       const exp = part.answer;
       const wrong = [];
       for (let i = 0; i < Math.max(got.length, exp.length); i++) if (got[i] !== exp[i]) wrong.push(i + 1);
-      if (!wrong.length) return { status: 'ok', html: 'Correct!' };
-      return { status: 'bad', html: `Not quite — check line${wrong.length > 1 ? 's' : ''} ${wrong.join(', ')}` + (got.length !== exp.length ? ` (the output has ${exp.length} lines).` : '.') };
+      if (!wrong.length) return { status: 'ok', html: '' };
+      return { status: 'bad', html: `Check line${wrong.length > 1 ? 's' : ''} ${wrong.join(', ')}` + (got.length !== exp.length ? ` (the output has ${exp.length} lines).` : '.') };
     },
   };
   const AUTO = new Set(Object.keys(CHECK));
@@ -285,7 +343,7 @@
     const setAnswer = v => { state.answers[key] = v; save(); updateNav(); };
     let getValue;
 
-    // — inputs
+    // inputs
     if (part.kind === 'line' || part.kind === 'expr' || part.kind === 'value' || part.kind === 'seq') {
       const input = el('input', 'answer' + (part.kind === 'value' || part.kind === 'seq' ? ' short' : ' mono'));
       input.type = 'text';
@@ -296,7 +354,6 @@
       input.setAttribute('aria-label', (label || ex.id).replace(/<[^>]+>/g, ''));
       if (part.kind === 'seq') input.placeholder = 'e.g., 1, 2, 3';
       if (part.kind === 'line') input.placeholder = 'one line of Java';
-      if (part.kind === 'expr') input.placeholder = part.mode === 'example' ? 'with the numbers' : part.mode === 'statement' ? 'a statement' : 'with the variables';
       input.value = saved || '';
       input.addEventListener('input', () => setAnswer(input.value));
       input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ctx.checkAll(); } });
@@ -366,9 +423,9 @@
       box.appendChild(ta);
     }
 
-    // — solution content
+    // solution content
     if (part.kind === 'code') {
-      sol.appendChild(el('div', 'sol-title', 'Model solution'));
+      sol.appendChild(el('div', 'sol-title', 'Sample solution'));
       sol.appendChild(codeBlock(part.solution));
       if (part.given) {
         const d = el('details', 'test');
@@ -388,7 +445,7 @@
       }
       if (part.testNote) sol.appendChild(el('p', 'test-note', '<strong>Test it in VS Code:</strong> ' + part.testNote));
     } else if (part.kind === 'paper') {
-      sol.appendChild(el('div', 'sol-title', 'Model solution'));
+      sol.appendChild(el('div', 'sol-title', 'Sample solution'));
       sol.appendChild(umlDiagram(part.solutionUml));
       if (part.solutionNote) sol.appendChild(el('p', 'sol-note', part.solutionNote));
     } else if (part.kind === 'seqtable') {
@@ -396,16 +453,16 @@
       t.innerHTML = `<thead><tr><th></th>${part.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>` +
         part.rows.map((r, ri) => `<tr><th>${esc(r)}</th>${part.answers[ri].map(a => `<td><code>${esc(a)}</code></td>`).join('')}</tr>`).join('') + '</tbody>';
       const sc = el('div', 'table-scroll'); sc.appendChild(t);
-      sol.appendChild(el('div', 'sol-title', 'Model solution'));
+      sol.appendChild(el('div', 'sol-title', 'Sample solution'));
       sol.appendChild(sc);
     } else {
-      sol.appendChild(el('div', 'sol-title', 'Model answer'));
+      sol.appendChild(el('div', 'sol-title', 'Sample solution'));
       sol.appendChild(el('div', 'sol-body', partSolutionHtml(ex, part)));
     }
 
-    // — self-marking (for code, free, paper, and line answers that differ from the model)
-    const selfOk = el('button', 'btn small good', part.kind === 'code' ? '✓ Mine works the same way' : '✓ Mine is equivalent');
-    const selfBad = el('button', 'btn small', '✗ Not yet — I’ll redo it');
+    // self-marking (for code, free, paper, and line answers that differ from the model)
+    const selfOk = el('button', 'btn small good', part.kind === 'code' ? 'Mine works the same way' : 'Mine is equivalent');
+    const selfBad = el('button', 'btn small', 'Not yet, I will redo it');
     selfOk.type = selfBad.type = 'button';
     self.appendChild(el('span', 'selfmark-q', 'Your verdict:'));
     self.appendChild(selfOk);
@@ -419,36 +476,45 @@
     selfOk.addEventListener('click', () => setSelf('self-ok'));
     selfBad.addEventListener('click', () => setSelf('self-bad'));
 
+    let reveal = null;
+    const revealText = part.kind === 'paper' ? 'Show solution' : 'Compare with the solution';
     const showSolution = () => {
       sol.hidden = false;
       if (!AUTO.has(part.kind) || state.results[key] === 'review' || state.results[key] === 'self-ok' || state.results[key] === 'self-bad') {
         self.hidden = false;
       }
+      if (reveal) { reveal.textContent = 'Hide solution'; reveal.setAttribute('aria-expanded', 'true'); }
+    };
+    const hideSolution = () => {
+      sol.hidden = true;
+      self.hidden = true;
+      if (reveal) { reveal.textContent = revealText; reveal.setAttribute('aria-expanded', 'false'); }
     };
 
     // per-part reveal button for parts that are not auto-checked
     if (!AUTO.has(part.kind)) {
       const bar = el('div', 'part-actions');
-      const reveal = el('button', 'btn small', part.kind === 'paper' ? 'Show solution' : 'Compare with the solution');
+      reveal = el('button', 'btn small reveal', revealText);
       reveal.type = 'button';
-      reveal.addEventListener('click', () => { showSolution(); reveal.hidden = true; });
+      reveal.setAttribute('aria-expanded', 'false');
+      reveal.addEventListener('click', () => { if (sol.hidden) showSolution(); else hideSolution(); ctx.syncSolBtn(); });
       bar.appendChild(reveal);
       box.appendChild(bar);
       const st = state.results[key];
-      if (st === 'self-ok' || st === 'self-bad') { showSolution(); reveal.hidden = true; setSelf(st); }
+      if (st === 'self-ok' || st === 'self-bad') { showSolution(); setSelf(st); }
     }
 
     box.appendChild(fb);
     box.appendChild(sol);
     box.appendChild(self);
 
-    // — check (auto kinds)
+    // check (auto kinds)
     const check = (silent) => {
       if (!AUTO.has(part.kind)) return null;
       const res = CHECK[part.kind](ex, part, getValue());
       (ctx.markCells || []).forEach(f => f());
       if (!res) {
-        if (!silent) { fb.className = 'feedback info'; fb.innerHTML = 'Write an answer first.'; }
+        if (!silent) { fb.className = 'feedback info'; fb.innerHTML = '<strong>Write an answer first.</strong>'; }
         return null;
       }
       const prev = state.results[key];
@@ -456,7 +522,9 @@
       // keep the student's own verdict while the answer is unchanged
       if (status === 'review' && (prev === 'self-ok' || prev === 'self-bad') && silent) status = prev;
       fb.className = 'feedback ' + (res.status === 'ok' ? 'ok' : res.status === 'bad' ? 'bad' : 'info');
-      fb.innerHTML = (res.status === 'ok' ? '✓ ' : res.status === 'bad' ? '✗ ' : '≈ ') + res.html;
+      // A bold label first, as on Foundations; color is never the only cue.
+      const tag = res.status === 'ok' ? '✓ Correct.' : res.status === 'bad' ? '✗ Incorrect.' : 'Compare with the solution.';
+      fb.innerHTML = `<strong>${tag}</strong> ${res.html}`.trim();
       if (res.status === 'review') {
         sol.hidden = false; self.hidden = false;
         if (status === 'self-ok' || status === 'self-bad') setSelf(status);
@@ -470,7 +538,7 @@
       return status;
     };
 
-    ctx.parts.push({ part, check, showSolution, isAuto: AUTO.has(part.kind) });
+    ctx.parts.push({ part, key, check, showSolution, hideSolution, isShown: () => !sol.hidden, isAuto: AUTO.has(part.kind) });
     // restore feedback for answers that were checked before
     if (AUTO.has(part.kind) && state.results[key]) check(true);
     return box;
@@ -498,44 +566,45 @@
   // ------------------------------------------------------------ rendering: pages
   const main = $('#main');
 
+  // "about 10 min" and "like Midterm 2, Q25", shown as one grey line
+  const secMeta = sec => esc(['about ' + sec.time, sec.exam].filter(Boolean).join(' · '));
+
   function renderHome() {
-    document.title = 'Catch-Up Practice — CMPINF 0401';
+    document.title = 'Catch-up practice · CMPINF 0401';
     main.innerHTML = '';
     const intro = el('section', 'intro');
     intro.innerHTML = `
       <h1>Catch-up practice</h1>
-      <p class="lead">All topics of Midterm 1 &amp; Midterm 2 — from one-liners to exam level.</p>
+      <p>Practice for every topic of Midterm 1 and Midterm 2, from single lines of Java to exam-level questions.
+        For explanations and examples, use the <a href="https://pitt-0401.github.io/java-foundations/">Java Foundations</a> pages.</p>
       <div class="howto">
         <h2>How to use this page</h2>
-        <ul>
-          <li>Pick a section and solve the exercises <strong>on your own</strong> first — on paper or in your head.</li>
-          <li>Then type your answer and press <kbd>Check</kbd>. Short answers are checked right away; for methods and classes, you compare with the model solution — and test it in VS Code.</li>
-          <li>Stuck? Go back to the matching part of the <a href="catch-up.pdf" target="_blank" rel="noopener">cheat sheet (PDF)</a>.</li>
-          <li>A wrong attempt is a great starting point — a blank page is not.</li>
-        </ul>
-        <p class="small">Your answers and progress are saved in this browser only (nothing is sent anywhere).</p>
+        <ol>
+          <li>Pick a section and solve each exercise on your own first, on paper or in your head.</li>
+          <li>Type your answer and press <kbd>Check</kbd>. Short answers are checked right away. For methods and classes, compare your code with the sample solution and test it in VS Code.</li>
+          <li>If you are stuck, go back to the matching page in Java Foundations. A wrong attempt teaches you more than an empty answer.</li>
+        </ol>
+        <p class="small">Your answers and progress are saved in this browser only. Nothing is sent anywhere.</p>
       </div>`;
     main.appendChild(intro);
 
-    const grid = el('section', 'cards');
+    // Sections: a plain list, one row per section (no cards).
+    const secs = el('section', 'home-sections', '<h2>Sections</h2>');
+    const ul = el('ul', 'sections');
     SECTIONS.forEach(sec => {
       const list = EXERCISES.filter(e => e.section === sec.id);
       const done = list.filter(e => exStatus(e) === 'done').length;
-      const card = el('a', 'card');
-      card.href = '#/' + list[0].id;
-      card.innerHTML = `
-        <div class="card-top"><span class="badge">${sec.id}</span><span class="time">⏳ ${esc(sec.time)}</span></div>
-        <h3>${esc(sec.title)}</h3>
-        ${sec.exam ? `<div class="exam">${esc(sec.exam)}</div>` : ''}
-        <div class="progress"><div style="width:${(100 * done / list.length).toFixed(0)}%"></div></div>
-        <div class="count">${done} / ${list.length} done</div>`;
-      grid.appendChild(card);
+      ul.appendChild(el('li', null, `
+        <a href="#/${list[0].id}"><span class="sec-id">${sec.id}.</span> ${esc(sec.title)}</a>
+        <span class="meta">${secMeta(sec)}</span>
+        <span class="done-count"><span class="progress" aria-hidden="true"><div style="width:${(100 * done / list.length).toFixed(0)}%"></div></span>${done} of ${list.length} done</span>`));
     });
-    main.appendChild(grid);
+    secs.appendChild(ul);
+    main.appendChild(secs);
 
     const check = el('section', 'checklist');
-    check.innerHTML = '<h2>Summary — Midterm 1 &amp; 2 topics</h2><p>Check off what you can do <em>without</em> the cheat sheet:</p>';
-    const ul = el('ul');
+    check.innerHTML = '<h2>Checklist: Midterm 1 and 2 topics</h2><p>Check off what you can do without notes.</p>';
+    const items = el('ul');
     CHECKLIST.forEach((item, i) => {
       const li = el('li');
       const lab = el('label');
@@ -546,9 +615,9 @@
       lab.appendChild(cb);
       lab.appendChild(el('span', null, item));
       li.appendChild(lab);
-      ul.appendChild(li);
+      items.appendChild(li);
     });
-    check.appendChild(ul);
+    check.appendChild(items);
     const reset = el('button', 'btn small subtle', 'Reset all answers and progress');
     reset.type = 'button';
     reset.addEventListener('click', () => {
@@ -567,13 +636,13 @@
     const idx = exIndex(ex.id);
     const inSection = EXERCISES.filter(e => e.section === ex.section);
     const posInSection = inSection.indexOf(ex) + 1;
-    document.title = `${ex.id} — Catch-Up Practice`;
+    document.title = `${ex.id} · Catch-up practice`;
     main.innerHTML = '';
 
     const head = el('div', 'ex-head');
     head.innerHTML = `
-      <div class="crumbs"><a href="#/">Overview</a> › <span class="badge">${sec.id}</span> [Practice] ${esc(sec.title)}
-        <span class="time">⏳ ${esc(sec.time)}</span>${sec.exam ? `<span class="exam">${esc(sec.exam)}</span>` : ''}</div>`;
+      <div class="crumbs"><a href="#/">Overview</a> › <span><span class="sec-id">${sec.id}.</span> ${esc(sec.title)}</span>
+        <span>· ${secMeta(sec)}</span></div>`;
     main.appendChild(head);
 
     // section task: shown on every exercise of the section, collapsed after the first one
@@ -585,7 +654,7 @@
     main.appendChild(task);
 
     const card = el('article', 'exercise');
-    card.appendChild(el('h1', null, `${ex.id}${ex.title ? ' ' + esc(ex.title) : ''} <span class="of">${posInSection} / ${inSection.length}</span>`));
+    card.appendChild(el('h1', null, `${ex.id}${ex.title ? ' ' + esc(ex.title) : ''} <span class="of">${posInSection} of ${inSection.length}</span>`));
     if (ex.body) card.appendChild(el('div', 'ex-body', ex.body));
 
     const visual = el('div', 'ex-visual' + (ex.uml && ex.code ? ' two' : ''));
@@ -597,13 +666,13 @@
       card.appendChild(el('div', 'given', `Given: ${describeEnv(envFrom(ex.vars))}`));
     }
 
-    const ctx = { parts: [] };
-    const partsBox = el('div', 'parts' + (ex.section === 'B' ? ' parts-b' : ''));
-    ctx.checkAll = () => checkAll();
+    const ctx = { parts: [], syncSolBtn: () => {} };
+    const partsBox = el('div', 'parts');
+    ctx.checkAll = () => { checkAll(); ctx.syncSolBtn(); };
     ex.parts.forEach((part, i) => partsBox.appendChild(renderPart(ex, part, i, ctx)));
     card.appendChild(partsBox);
 
-    const note = el('div', 'note', ex.note ? '💡 ' + ex.note : '');
+    const note = el('div', 'note', ex.note ? '<strong>Note.</strong> ' + ex.note : '');
     note.hidden = true;
     card.appendChild(note);
 
@@ -611,42 +680,66 @@
     const hasAuto = ctx.parts.some(p => p.isAuto);
     const checkBtn = el('button', 'btn primary', 'Check');
     checkBtn.type = 'button';
-    const solBtn = el('button', 'btn', 'Show solution');
+    const solBtn = el('button', 'btn reveal', 'Show solution');
+    solBtn.setAttribute('aria-expanded', 'false');
     solBtn.type = 'button';
     function checkAll() {
       const res = ctx.parts.map(p => p.check(false));
       updateNav();
       if (ex.note && res.some(r => r)) note.hidden = false;
     }
-    checkBtn.addEventListener('click', checkAll);
+    const anyShown = () => ctx.parts.some(p => p.isShown());
+    ctx.syncSolBtn = () => {
+      solBtn.textContent = anyShown() ? 'Hide solution' : 'Show solution';
+      solBtn.setAttribute('aria-expanded', String(anyShown()));
+    };
+    checkBtn.addEventListener('click', () => { checkAll(); ctx.syncSolBtn(); });
     solBtn.addEventListener('click', () => {
-      ctx.parts.forEach(p => p.showSolution());
-      note.hidden = !ex.note;
+      if (anyShown()) {
+        ctx.parts.forEach(p => p.hideSolution());
+        note.hidden = true;
+      } else {
+        ctx.parts.forEach(p => p.showSolution());
+        note.hidden = !ex.note;
+      }
+      ctx.syncSolBtn();
+    });
+    const resetBtn = el('button', 'btn subtle reset', 'Reset');
+    resetBtn.type = 'button';
+    resetBtn.title = 'Clear your answers for this exercise and hide the solution';
+    resetBtn.addEventListener('click', () => {
+      const hasCode = ex.parts.some((p, i) => p.kind === 'code' && hasAnswer(state.answers[partKey(ex, i)]));
+      if (hasCode && !confirm(`Clear your code for ${ex.id}?`)) return;
+      ctx.parts.forEach(p => { delete state.answers[p.key]; delete state.results[p.key]; });
+      save();
+      render();
     });
     if (hasAuto) actions.appendChild(checkBtn);
     actions.appendChild(solBtn);
+    actions.appendChild(resetBtn);
     card.appendChild(actions);
     if (ex.note && ex.parts.every((p, i) => partStatus(ex, i))) note.hidden = false;
+    ctx.syncSolBtn();
 
     main.appendChild(card);
 
     const pager = el('nav', 'pager');
     const prev = EXERCISES[idx - 1], next = EXERCISES[idx + 1];
     pager.innerHTML = (prev ? `<a class="btn" href="#/${prev.id}">← ${prev.id}</a>` : '<span></span>') +
-      (next ? `<a class="btn primary-outline" href="#/${next.id}">${next.id} →</a>` : '<a class="btn primary-outline" href="#/">Back to the overview</a>');
+      (next ? `<a class="btn" href="#/${next.id}">${next.id} →</a>` : '<a class="btn" href="#/">Back to the overview</a>');
     main.appendChild(pager);
   }
 
   const CHECKLIST = [
-    'You can map UML attributes and methods to Java — and back (order of name / type!)',
+    'You can map UML attributes and methods to Java and back (watch the order of name and type)',
     'You can implement a class with private attributes, a constructor (<code>this.</code>), getters, and <code>toString()</code>',
     'You can write a method header: return type, <code>static</code> or not, array parameters',
-    'You can declare, create, and fill 1D and 2D arrays — and know <code>grid.length</code> (rows) vs. <code>grid[i].length</code> (columns of row <code>i</code>)',
+    'You can declare, create, and fill 1D and 2D arrays, and you know <code>grid.length</code> (rows) and <code>grid[i].length</code> (columns of row <code>i</code>)',
     'You can traverse a 1D array and each row of a 2D array (sum, count, maximum, average)',
-    'You can predict <code>int</code> vs. <code>double</code> results — and fix integer division (<code>.0</code> or cast)',
+    'You can predict <code>int</code> and <code>double</code> results, and fix integer division (<code>.0</code> or a cast)',
     'You can translate a problem statement (discount, tax, percent, average, overtime) into a Java expression',
     'You can implement a subclass from UML: <code>extends</code>, <code>super(…)</code>, <code>@Override</code>, <code>super.method()</code>',
-    'You can read input with a <code>Scanner</code> (incl. the extra <code>nextLine()</code>) and print with <code>print</code>, <code>println</code>, and <code>printf</code>',
+    'You can read input with a <code>Scanner</code> (including the extra <code>nextLine()</code>) and print with <code>print</code>, <code>println</code>, and <code>printf</code>',
     'You can compare Strings with <code>equals</code> and explain references, <code>null</code>, and <code>static</code>',
     'You can catch an exception with <code>try</code>/<code>catch</code> and name the common runtime exceptions',
     'You can trace SelectionSort, BubbleSort, InsertionSort, and binary search pass by pass',
@@ -660,7 +753,7 @@
     nav.innerHTML = '';
     SECTIONS.forEach(sec => {
       const group = el('div', 'nav-group');
-      group.appendChild(el('a', 'nav-section', `<span class="badge">${sec.id}</span> ${esc(sec.title)}`)).href = '#/' + EXERCISES.find(e => e.section === sec.id).id;
+      group.appendChild(el('a', 'nav-section', `<span class="sec-id">${sec.id}</span> ${esc(sec.title)}`)).href = '#/' + EXERCISES.find(e => e.section === sec.id).id;
       const chips = el('div', 'chips');
       EXERCISES.filter(e => e.section === sec.id).forEach(ex => {
         const a = el('a', 'chip', ex.id.split('.')[1]);
@@ -683,8 +776,10 @@
       if (st === 'done') done++;
       a.className = 'chip ' + st + (a.dataset.id === current ? ' current' : '');
       a.setAttribute('aria-label', `${ex.id}: ${STATUS_LABEL[st]}`);
+      a.title = `${ex.id}${ex.title ? ' ' + ex.title : ''} (${STATUS_LABEL[st]})`;
+      if (a.dataset.id === current) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    $('#progress-text').textContent = `${done} / ${EXERCISES.length} done`;
+    $('#progress-text').textContent = `${done} of ${EXERCISES.length} done`;
     $('#progress-bar').style.width = (100 * done / EXERCISES.length) + '%';
   }
 

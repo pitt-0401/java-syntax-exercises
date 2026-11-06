@@ -2,7 +2,6 @@
 # Builds the catch-up pack (after M2, before M3):
 #   catch-up.pdf             students: cheat sheet + practice with space to write
 #   catch-up-solutions.pdf   same pages with every answer in red
-#   web/catch-up.pdf         copy of catch-up.pdf for the practice website (web/)
 # LaTeX's helper files go into build/.
 # Every number in the solutions was checked by compiling and running the reference code on JDK 26.
 cd "$(dirname "$0")"
@@ -17,5 +16,4 @@ build() {  # $1 = output name, $2 = extra TeX before \input
 }
 build catch-up ""
 build catch-up-solutions "\def\withsolutions{}"
-# The practice website (web/) links the student PDF as its cheat sheet -- never the solutions.
-cp "$TEX/catch-up.pdf" web/catch-up.pdf && echo "copied catch-up.pdf to web/"
+# The PDFs are not part of the practice website: never copy them into web/.

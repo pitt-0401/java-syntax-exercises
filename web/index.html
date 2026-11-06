@@ -3,28 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Catch-Up Practice — CMPINF 0401</title>
+  <title>Catch-up practice · CMPINF 0401</title>
   <meta name="description" content="Self-study practice for all Midterm 1 and Midterm 2 topics of CMPINF 0401.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
-  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%232b4fa3'/><text x='50' y='72' font-family='monospace' font-size='64' font-weight='700' fill='white' text-anchor='middle'>{}</text></svg>">
+  <script>
+    // Apply a saved light/dark choice before first paint (no flash). See theme code in js/app.js.
+    try { var t = localStorage.getItem('cmpinf0401-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) { /* storage blocked: follow the OS */ }
+  </script>
+  <!-- The fonts of Java Foundations (Material loads them there). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
   <header class="topbar">
     <button id="menu-btn" class="menu-btn" type="button" aria-label="Show all exercises">☰</button>
-    <a class="brand" href="#/">Catch-Up Practice <span>CMPINF 0401 · Midterm 1 &amp; 2</span></a>
+    <a class="brand" href="#/">Catch-up practice <span>CMPINF 0401 · Midterm 1 and 2</span></a>
     <div class="top-progress" aria-live="polite">
       <div class="bar"><div id="progress-bar"></div></div>
       <span id="progress-text"></span>
     </div>
-    <a class="top-link" href="catch-up.pdf" target="_blank" rel="noopener">Cheat sheet (PDF)</a>
+    <a class="top-link" href="https://pitt-0401.github.io/java-foundations/">Java Foundations</a>
+    <button id="theme-btn" class="theme-btn" type="button" aria-label="Theme: system" title="Theme: system"></button>
   </header>
   <div class="layout">
     <nav id="nav" class="sidebar" aria-label="Exercises"></nav>
     <main id="main"></main>
   </div>
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>© 2026 Nadine von Frankenberg · CMPINF 0401</span>
+      <a href="https://github.com/pitt-0401/java-syntax-exercises" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Source on GitHub
+      </a>
+    </div>
+  </footer>
   <noscript><p style="padding:2rem">This practice page needs JavaScript.</p></noscript>
-  <script src="js/java-eval.js"></script>
-  <script src="js/exercises.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/java-eval.js?v=10"></script>
+  <script src="js/exercises.js?v=10"></script>
+  <script src="js/app.js?v=10"></script>
 </body>
 </html>
