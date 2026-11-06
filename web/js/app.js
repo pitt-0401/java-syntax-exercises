@@ -566,8 +566,8 @@
   // ------------------------------------------------------------ rendering: pages
   const main = $('#main');
 
-  // "about 10 min" and "like Midterm 2, Q25", shown as one grey line
-  const secMeta = sec => esc(['about ' + sec.time, sec.exam].filter(Boolean).join(' · '));
+  // "about 10 min", shown as a grey line
+  const secMeta = sec => esc('about ' + sec.time);
 
   function renderHome() {
     document.title = 'Catch-up practice · CMPINF 0401';

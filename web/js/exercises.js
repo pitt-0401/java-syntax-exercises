@@ -19,7 +19,7 @@ window.SECTIONS = [
     task: 'Write <em>one</em> line of Java for each item: a statement, an expression, or a header.' },
   { id: 'B', title: 'Problem statement → Java expression', time: '15 min',
     task: 'Write a Java expression for each item, using the variables so it works for any value. All variables are already declared.<br>The checker runs your expression with the given values <em>and</em> with other values, just like a method that is called more than once.' },
-  { id: 'C', title: 'Arrays, loops & input', time: '50 min', exam: 'like Midterm 2, Q25',
+  { id: 'C', title: 'Arrays, loops & input', time: '50 min',
     task: 'Implement each method with the given header. Most of them follow the same pattern:',
     code: `public static RESULT_TYPE name(int[] values) {
     RESULT_TYPE result = START;            // e.g., 0 for a sum, new int[...] for an array
@@ -30,7 +30,7 @@ window.SECTIONS = [
 }` },
   { id: 'D', title: 'Trace it', time: '30 min',
     task: 'Trace each piece of code by hand, without a computer. This is how sorting, searching, stacks, and queues are asked on the exam.' },
-  { id: 'E', title: 'UML ↔ Java', time: '60 min', exam: 'like Midterm 2, Q27',
+  { id: 'E', title: 'UML ↔ Java', time: '60 min',
     task: 'Implement the <strong>highlighted</strong> parts of each class diagram. First translate the diagram line by line (cheat sheet: “Reading UML”), then add the logic.' },
   { id: 'F', title: 'Debugging', time: '15 min',
     task: 'Each code snippet compiles but does not work as intended (wrong result or crash). For each: (1) write the corrected line of code, (2) briefly explain why the original line is incorrect.' },
@@ -351,7 +351,7 @@ public class Practice {
     }
 }` }] },
   { id: 'C.7', section: 'C', title: 'columnTotals (2D)',
-    body: 'Implement <code>public static int[] columnTotals(int[][] sales)</code>: return the total of each <strong>column</strong> (same <code>sales</code> as in Midterm 2, Q25). Assume that all rows have the same length.',
+    body: 'Implement <code>public static int[] columnTotals(int[][] sales)</code>: return the total of each <strong>column</strong>. Assume that all rows have the same length.',
     code: `int[][] sales = { {10, 20, 30, 40}, {15, 25, 35, 45}, {5, 10, 15, 20} };
 columnTotals(sales)   // returns {30, 55, 80, 105}`,
     parts: [

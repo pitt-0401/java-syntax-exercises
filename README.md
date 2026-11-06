@@ -14,7 +14,7 @@ No build step and no dependencies: plain HTML, CSS, and JavaScript. Answers and 
 | `web/js/exercises.js` | **All exercises, answers, and solutions.** Edit this file to change an exercise. |
 | `web/js/java-eval.js` | Small evaluator for Java expressions (int/double/boolean, int division, casts) used to check Part B |
 | `web/js/app.js` | Rendering, checking, and progress |
-| `make.sh` | Builds both PDFs from `catch-up.tex` (one folder above this repository). The PDFs stay outside the repository and are not published. |
+| `make.sh` | Builds the printed catch-up pack from `catch-up.tex` (one folder above this repository). Its output stays outside the repository and is not published. |
 
 The site follows the design of the companion site, Java Foundations
 (<https://pitt-0401.github.io/java-foundations/>): same fonts, colors, code
@@ -35,9 +35,9 @@ its link in `index.html`, so browsers load the new version.
 
 Every sample solution was compiled and run with its test file.
 
-## Keep it in sync with the PDF
+## Keep it in sync with `catch-up.tex`
 
-`web/js/exercises.js` is a separate copy of Part 2 of `catch-up.tex`, which is one folder above this repository. When you change an exercise in the `.tex`, change it here too, then run `./make.sh` to rebuild the PDFs.
+`web/js/exercises.js` is a separate copy of Part 2 of `catch-up.tex`, which is one folder above this repository. When you change an exercise in the `.tex`, change it here too, then run `./make.sh` to rebuild the printed pack.
 
 ## Publishing
 
