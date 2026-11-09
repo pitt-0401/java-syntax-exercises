@@ -43,10 +43,13 @@
   const STORE_KEY = 'cmpinf0401-catchup-v1';
 
   // ------------------------------------------------------------ state
-  let state = { answers: {}, results: {}, checklist: {} };
+  // One-time moves of saved answers (below). A fresh start needs none of them.
+  const MIGRATED = { bNoExample: true, e5NoDrawing: true, cRenumbered: true, b2Replaced: true };
+  const freshState = () => ({ answers: {}, results: {}, checklist: {}, ...MIGRATED });
+  let state = freshState();
   try {
     const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-    if (saved) state = { ...state, ...saved };
+    if (saved) state = { answers: {}, results: {}, checklist: {}, ...saved };
     // Section B used to have an Example part before the variables part.
     // Move saved answers from part 1 to part 0 once.
     if (!state.bNoExample) {
@@ -208,6 +211,14 @@
       const w = (part.wrong || []).find(x => normLine(x.answer) === v);
       if (w) return { status: 'bad', html: w.msg };
       if (part.answers.some(a => normLine(a) === v)) {
+        // a header (loop, if, catch, method) gets a {, never a ;
+        const isHeader = /\{\s*$/.test(part.solution) || /^\s*(public|private|protected|static)\b.*\)\s*$/.test(part.solution);
+        if (isHeader && /;\s*$/.test(value)) {
+          const isLoop = /^\s*(for|while)\b/.test(value);
+          return { status: 'bad', html: 'Remove the <code>;</code> at the end. ' + (isLoop
+            ? 'A <code>;</code> right after the header is an empty loop body: the loop repeats nothing, and the block below runs only once (or the loop never ends).'
+            : 'This line starts a block, so the <code>{</code> comes next, not a <code>;</code>.') };
+        }
         const needsSemi = /;\s*$/.test(part.solution) && !/;\s*$/.test(value);
         return { status: 'ok', html: needsSemi ? 'Do not forget the <code>;</code> at the end of a statement.' : '' };
       }
@@ -378,7 +389,16 @@
     self.hidden = true;
 
     const saved = state.answers[key];
-    const setAnswer = v => { state.answers[key] = v; save(); updateNav(); };
+    const setAnswer = v => {
+      state.answers[key] = v;
+      // a changed answer needs a new verdict
+      if (state.results[key] === 'self-ok' || state.results[key] === 'self-bad') {
+        delete state.results[key];
+        selfOk.classList.remove('active'); selfBad.classList.remove('active');
+        delete box.dataset.status;
+      }
+      save(); updateNav();
+    };
     let getValue;
 
     // inputs
@@ -459,29 +479,30 @@
       if (part.kind === 'code') enableCodeEditing(ta);
       getValue = () => ta.value;
       box.appendChild(ta);
+      if (part.kind === 'code' && part.given) {
+        const d = el('details', 'test');
+        d.innerHTML = '<summary>The given class</summary>';
+        d.appendChild(codeBlock(part.given));
+        box.appendChild(d);
+      }
+      // the test comes before the solution: run your own code first, then compare
+      if (part.kind === 'code' && part.test) {
+        const d = el('details', 'test');
+        d.innerHTML = '<summary>Test it in VS Code</summary><p>' + (part.testIntro || 'Copy this file, add your code, and run it. Every line should show the same value twice.') + '</p>';
+        const btn = el('button', 'btn small', 'Copy test file');
+        btn.type = 'button';
+        btn.addEventListener('click', () => copyText(part.test, btn));
+        d.appendChild(btn);
+        d.appendChild(codeBlock(part.test));
+        box.appendChild(d);
+      }
+      if (part.kind === 'code' && part.testNote) box.appendChild(el('p', 'test-note', '<strong>Test it in VS Code:</strong> ' + part.testNote));
     }
 
     // solution content
     if (part.kind === 'code') {
       sol.appendChild(el('div', 'sol-title', 'Sample solution'));
       sol.appendChild(codeBlock(part.solution));
-      if (part.given) {
-        const d = el('details', 'test');
-        d.innerHTML = '<summary>The given class</summary>';
-        d.appendChild(codeBlock(part.given));
-        sol.appendChild(d);
-      }
-      if (part.test) {
-        const d = el('details', 'test');
-        d.innerHTML = '<summary>Test it in VS Code</summary><p>Copy this file, add your code, and run it. Every line should show the same value twice.</p>';
-        const btn = el('button', 'btn small', 'Copy test file');
-        btn.type = 'button';
-        btn.addEventListener('click', () => copyText(part.test, btn));
-        d.appendChild(btn);
-        d.appendChild(codeBlock(part.test));
-        sol.appendChild(d);
-      }
-      if (part.testNote) sol.appendChild(el('p', 'test-note', '<strong>Test it in VS Code:</strong> ' + part.testNote));
     } else if (part.kind === 'paper') {
       sol.appendChild(el('div', 'sol-title', 'Sample solution'));
       sol.appendChild(umlDiagram(part.solutionUml));
@@ -620,7 +641,7 @@
         <ol>
           <li>Pick a section and solve each exercise on your own first, on paper or in your head.</li>
           <li>Type your answer and press <kbd>Check</kbd>. Short answers are checked right away. For methods and classes, compare your code with the sample solution and test it in VS Code.</li>
-          <li>Stuck? Reread the topic in Java Foundations and try again. Even a wrong answer helps: the feedback shows you what to fix.</li>
+          <li>Stuck? Reread the topic in Java Foundations or in the lecture slides, and try again. Even a wrong answer helps: the feedback shows you what to fix.</li>
         </ol>
         <p class="small">Your answers and progress are saved in this browser only. Nothing is sent anywhere.</p>
       </div>`;
@@ -660,7 +681,7 @@
     reset.type = 'button';
     reset.addEventListener('click', () => {
       if (confirm('Delete all your answers and progress on this page?')) {
-        state = { answers: {}, results: {}, checklist: {} };
+        state = freshState();
         try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
         render();
       }
@@ -769,20 +790,20 @@
   }
 
   const CHECKLIST = [
-    'You can map UML attributes and methods to Java and back (watch the order of name and type)',
+    'You can read a class diagram and write the matching Java (watch the order of name and type)',
     'You can implement a class with private attributes, a constructor (<code>this.</code>), getters, and <code>toString()</code>',
     'You can write a method header: return type, <code>static</code> or not, array parameters',
     'You can declare, create, and fill 1D and 2D arrays, and you know <code>grid.length</code> (rows) and <code>grid[i].length</code> (columns of row <code>i</code>)',
     'You can traverse a 1D array and each row of a 2D array (sum, count, maximum, average)',
     'You can predict <code>int</code> and <code>double</code> results, and fix integer division (<code>.0</code> or a cast)',
-    'You can translate a problem statement (discount, tax, percent, average, overtime) into a Java expression',
-    'You can implement a subclass from UML: <code>extends</code>, <code>super(…)</code>, <code>@Override</code>, <code>super.method()</code>',
+    'You can translate a problem statement (discount, percent, average, share) into a Java expression',
+    'You can implement a subclass from a class diagram: <code>extends</code>, <code>super(…)</code>, <code>@Override</code>, <code>super.method()</code>',
     'You can read input with a <code>Scanner</code> (including the extra <code>nextLine()</code>) and print with <code>print</code>, <code>println</code>, and <code>printf</code>',
     'You can compare Strings with <code>equals</code> and explain references, <code>null</code>, and <code>static</code>',
     'You can catch an exception with <code>try</code>/<code>catch</code> and name the common runtime exceptions',
     'You can trace SelectionSort, BubbleSort, InsertionSort, and binary search pass by pass',
     'You can give the Big-O of a loop, a nested loop, and a halving loop',
-    'You can trace <code>push</code>/<code>pop</code>/<code>top</code> on a stack and <code>enqueue</code>/<code>dequeue</code> on a queue',
+    'You can trace <code>push</code>/<code>pop</code> on a stack and <code>enqueue</code>/<code>dequeue</code> on a queue',
   ];
 
   // ------------------------------------------------------------ sidebar

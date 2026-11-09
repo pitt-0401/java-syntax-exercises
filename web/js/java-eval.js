@@ -38,7 +38,15 @@
         i = j + 1;
         continue;
       }
-      if (ch === "'") throw new JavaError('Use double quotes for text: "..." (single quotes are for one char).');
+      if (ch === "'") {
+        // one char: 'a' or an escape such as '\n'
+        const c = /^'(\\[nt0'"\\]|[^'\\\n])'/.exec(src.slice(i));
+        if (!c) throw new JavaError('Use double quotes for text: "..." (single quotes are for one char).');
+        const raw = c[1];
+        tokens.push({ t: 'chr', v: raw[0] === '\\' ? (raw[1] === 'n' ? '\n' : raw[1] === 't' ? '\t' : raw[1] === '0' ? '\0' : raw[1]) : raw });
+        i += c[0].length;
+        continue;
+      }
       if (ch === '{' || ch === '}') throw new JavaError('Array literals { … } are not needed here. Use the variables.');
       const id = /^[A-Za-z_$][\w$]*/.exec(src.slice(i));
       if (id) { tokens.push({ t: 'id', v: id[0] }); i += id[0].length; continue; }
@@ -66,11 +74,18 @@
     if (x.type !== 'boolean') throw new JavaError(`bad operand type ${x.type} for "${op}" (needs a boolean).`);
   }
 
+  // a char in arithmetic is its character code, as in Java
+  const charToInt = x => x.type === 'char' ? int(x.v.charCodeAt(0)) : x;
+
+  // > 0 while parsing a part that Java never runs (the skipped side of && / || / ? :)
+  let skipping = 0;
+
   function arith(op, a, b) {
     if (op === '+' && (a.type === 'String' || b.type === 'String')) {
       if (isArr(a) || isArr(b)) throw new JavaError('Adding an array to a String prints its reference, e.g., [I@1b6d3586, not the values.');
       return str(format(a) + format(b));
     }
+    a = charToInt(a); b = charToInt(b);
     needNumber(a, op); needNumber(b, op);
     const isD = a.type === 'double' || b.type === 'double';
     switch (op) {
@@ -79,16 +94,19 @@
       case '*': return isD ? dbl(a.v * b.v) : int(Math.imul(a.v, b.v));
       case '/':
         if (isD) return dbl(a.v / b.v);
+        if (b.v === 0 && skipping) return int(0);
         if (b.v === 0) throw new JavaError('ArithmeticException: / by zero');
         return int(Math.trunc(a.v / b.v));
       case '%':
         if (isD) return dbl(a.v % b.v);
+        if (b.v === 0 && skipping) return int(0);
         if (b.v === 0) throw new JavaError('ArithmeticException: / by zero');
         return int(a.v % b.v);
     }
   }
 
   function compare(op, a, b) {
+    a = charToInt(a); b = charToInt(b);
     if (op === '==' || op === '!=') {
       if (a.type === 'String' || b.type === 'String') {
         throw new JavaError('== on Strings compares references (same object?), not the text → use equals(...).');
@@ -156,10 +174,9 @@
       if (isOp('?')) {
         next();
         needBool(c, '?');
-        const a = expr();
-        expect(':');
-        const b = expr();
-        return c.v ? a : b;
+        // only the chosen branch runs, like Java
+        if (c.v) { const a = expr(); expect(':'); skipOperand(expr); return a; }
+        skipOperand(expr); expect(':'); return expr();
       }
       return c;
     }
@@ -173,7 +190,7 @@
         if (op === '&&' || op === '||') {
           needBool(left, op);
           // short-circuit, like Java: the right side only runs when needed
-          if ((op === '&&' && !left.v) || (op === '||' && left.v)) { skipOperand(BIN[op] + 1); continue; }
+          if ((op === '&&' && !left.v) || (op === '||' && left.v)) { skipOperand(() => binary(BIN[op] + 1)); continue; }
           const right = binary(BIN[op] + 1);
           needBool(right, op);
           left = bool(right.v);
@@ -184,34 +201,21 @@
       }
     }
 
-    // Parse the right operand of a short-circuited && / || without throwing runtime errors.
-    function skipOperand(prec) {
-      const save = { used: new Set(used) };
-      try { binary(prec); } catch (e) {
-        if (!(e instanceof JavaError) || !/^(ArrayIndexOutOfBoundsException|ArithmeticException)/.test(e.message)) throw e;
-        // a runtime error (e.g., index out of bounds) in the skipped part: Java never runs it → fine.
-        // re-sync: skip tokens until an operator of lower precedence or the end
-        let depth = 0;
-        while (peek().t !== 'eof') {
-          const t = peek();
-          if (t.t === 'op' && (t.v === '(' || t.v === '[')) depth++;
-          if (t.t === 'op' && (t.v === ')' || t.v === ']')) { if (depth === 0) break; depth--; }
-          if (depth === 0 && t.t === 'op' && (t.v in BIN) && BIN[t.v] < prec) break;
-          if (depth === 0 && t.t === 'op' && (t.v === '?' || t.v === ':' || t.v === ';')) break;
-          next();
-        }
-      }
-      save.used.forEach(u => used.add(u));
+    // Parse a part that Java never runs: syntax and type errors still count,
+    // runtime errors (/ by zero, index out of bounds) do not.
+    function skipOperand(parse) {
+      skipping++;
+      try { parse(); } finally { skipping--; }
     }
 
     function unary() {
-      if (isOp('-')) { next(); const x = unary(); needNumber(x, '-'); return x.type === 'int' ? int(-x.v) : dbl(-x.v); }
-      if (isOp('+')) { next(); const x = unary(); needNumber(x, '+'); return x; }
+      if (isOp('-')) { next(); const x = charToInt(unary()); needNumber(x, '-'); return x.type === 'int' ? int(-x.v) : dbl(-x.v); }
+      if (isOp('+')) { next(); const x = charToInt(unary()); needNumber(x, '+'); return x; }
       if (isOp('!')) { next(); const x = unary(); needBool(x, '!'); return bool(!x.v); }
       // cast: ( double ) / ( int )
       if (isOp('(') && peek(1).t === 'id' && ['double', 'int', 'float', 'long'].includes(peek(1).v) && isOp(')', 2)) {
         next(); const type = next().v; next();
-        const x = unary();
+        const x = charToInt(unary());
         needNumber(x, '(' + type + ')');
         return type === 'int' || type === 'long' ? int(Math.trunc(x.v)) : dbl(x.v);
       }
@@ -237,6 +241,7 @@
           expect(']');
           if (!isArr(x)) throw new JavaError(`array required, but ${x.type} found: only arrays use [ ].`);
           if (idx.type !== 'int') throw new JavaError(`incompatible types: an index must be an int, not ${idx.type}.`);
+          if ((idx.v < 0 || idx.v >= x.v.length) && skipping) { x = { type: x.type.slice(0, -2), v: x.type === 'String[]' ? '' : x.type === 'boolean[]' ? false : 0 }; continue; }
           if (idx.v < 0 || idx.v >= x.v.length) throw new JavaError(`ArrayIndexOutOfBoundsException: Index ${idx.v} out of bounds for length ${x.v.length}`);
           const elemType = x.type.slice(0, -2);
           x = { type: elemType, v: x.v[idx.v] };
@@ -274,6 +279,7 @@
       const tok = next();
       if (tok.t === 'num') return { type: tok.type, v: tok.v };
       if (tok.t === 'str') return str(tok.v);
+      if (tok.t === 'chr') return { type: 'char', v: tok.v };
       if (tok.t === 'op' && tok.v === '(') { const x = expr(); expect(')'); return x; }
       if (tok.t === 'id') {
         if (tok.v === 'true' || tok.v === 'false') return bool(tok.v === 'true');
@@ -281,7 +287,7 @@
           expect('.');
           const name = next();
           if (name.t !== 'id' || !(name.v in MATH)) throw new JavaError(`Math.${name.v || '?'} is not supported here.`);
-          const a = args();
+          const a = args().map(charToInt);
           const m = MATH[name.v];
           if (a.length !== m.n) throw new JavaError(`Math.${name.v} takes ${m.n} argument(s).`);
           a.forEach(v => needNumber(v, 'Math.' + name.v));
@@ -297,7 +303,7 @@
 
     // statement forms: [type] name = expr ;   name op= expr ;
     let assignTo = null, assignOp = null, declared = null;
-    const TYPES = ['int', 'double', 'boolean', 'String'];
+    const TYPES = ['int', 'double', 'boolean', 'String', 'long', 'char'];
     if (peek().t === 'id' && TYPES.includes(peek().v) && peek(1).t === 'id') {
       declared = next().v;   // e.g., double result = ...
     }
@@ -307,7 +313,9 @@
       if (declared) {
         if (assignTo in env) throw new JavaError(`variable ${assignTo} is already defined`);
         if (assignOp !== '=') throw new JavaError(`variable ${assignTo} might not have been initialized`);
-        env = { ...env, [assignTo]: { type: declared, v: declared === 'String' ? '' : 0 } };
+        // a long is checked as an int here
+        const type = declared === 'long' ? 'int' : declared;
+        env = { ...env, [assignTo]: { type, v: type === 'String' ? '' : type === 'char' ? '\0' : 0 } };
       } else if (!(assignTo in env)) {
         throw new JavaError(`cannot find symbol: ${assignTo}`);
       }
@@ -321,14 +329,15 @@
     if (assignTo) {
       const target = env[assignTo];
       if (isArr(target)) throw new JavaError(`${assignTo} is an array → assign to one element, e.g., ${assignTo}[i] = …`);
-      let result = value;
+      // a char widens to int or double: int code = 'a'; gives 97
+      let result = value.type === 'char' && isNum(target) ? charToInt(value) : value;
       if (assignOp !== '=') {
         used.add(assignTo);
         result = arith(assignOp[0], target, value);
-      } else if (target.type === 'int' && value.type === 'double') {
+      } else if (target.type === 'int' && result.type === 'double') {
         throw new JavaError('incompatible types: possible lossy conversion from double to int');
-      } else if (target.type !== value.type && !(target.type === 'double' && value.type === 'int')) {
-        throw new JavaError(`incompatible types: ${value.type} cannot be converted to ${target.type}`);
+      } else if (target.type !== result.type && !(target.type === 'double' && result.type === 'int')) {
+        throw new JavaError(`incompatible types: ${result.type} cannot be converted to ${target.type}`);
       }
       if (target.type === 'double') result = dbl(+result.v);
       else if (target.type === 'int') result = int(result.v);
@@ -339,7 +348,7 @@
 
   // Java-style printing of a value (what println shows): 40.0, 3, true, 1.0E7, Ana
   function format(x) {
-    if (x.type === 'boolean' || x.type === 'int' || x.type === 'String') return String(x.v);
+    if (x.type === 'boolean' || x.type === 'int' || x.type === 'String' || x.type === 'char') return String(x.v);
     if (isArr(x)) return '{' + x.v.map(e => format({ type: x.type.slice(0, -2), v: e })).join(', ') + '}';
     const v = x.v;
     if (!isFinite(v)) return isNaN(v) ? 'NaN' : (v > 0 ? 'Infinity' : '-Infinity');
@@ -354,6 +363,7 @@
   // For feedback: Strings in quotes, so "Ana Lopez" vs "AnaLopez" is visible
   function display(x) {
     if (x.type === 'String') return JSON.stringify(x.v);
+    if (x.type === 'char') return "'" + x.v + "'";
     if (x.type === 'String[]') return '{' + x.v.map(e => JSON.stringify(e)).join(', ') + '}';
     return format(x);
   }
@@ -361,6 +371,7 @@
   function sameValue(a, b) {
     if (a.type === 'String' || b.type === 'String') return a.type === b.type && a.v === b.v;
     if (a.type === 'boolean' || b.type === 'boolean') return a.type === b.type && a.v === b.v;
+    if (a.type === 'char' || b.type === 'char') return a.type === b.type && a.v === b.v;
     if (isArr(a) || isArr(b)) return a.type === b.type && a.v.length === b.v.length && a.v.every((e, i) => e === b.v[i]);
     return Math.abs(a.v - b.v) <= 1e-9 * Math.max(1, Math.abs(a.v), Math.abs(b.v));
   }

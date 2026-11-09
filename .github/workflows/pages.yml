@@ -32,7 +32,13 @@ jobs:
             require("./web/js/java-eval.js");
             require("./web/js/exercises.js");
             const { evaluate, sameValue } = JavaEval;
-            const norm = s => s.trim().replace(/\s+/g, " ").replace(/ ?([^\w\s$]) ?/g, "$1").replace(/[;{\s]+$/, "");
+            // same as normLine in app.js: text inside "..." and \x27...\x27 is kept exactly
+            const norm = s => {
+              const lit = [];
+              return s.replace(/"(?:[^"\\]|\\.)*"|\x27(?:[^\x27\\]|\\.)*\x27/g, m => "\u0000" + (lit.push(m) - 1) + "\u0000")
+                .trim().replace(/\s+/g, " ").replace(/ ?([^\w\s$]) ?/g, "$1").replace(/[;{\s]+$/, "")
+                .replace(/\u0000(\d+)\u0000/g, (_, i) => lit[i]);
+            };
             const env = (vars, vals = {}) => Object.fromEntries(Object.entries(vars || {}).map(([n, [t, v]]) => [n, { type: t, v: n in vals ? vals[n] : v }]));
             let bad = 0;
             for (const ex of EXERCISES) ex.parts.forEach(p => {

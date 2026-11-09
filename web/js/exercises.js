@@ -227,7 +227,8 @@ window.EXERCISES = [
     }
     return total;
 }`,
-      test: `public class Practice {
+      test: `// Practice.java
+public class Practice {
     // paste your sum method here
 
     public static void main(String[] args) {
@@ -246,7 +247,8 @@ window.EXERCISES = [
     }
     return (double) sum / values.length;   // sum / values.length gives 4.0
 }`,
-      test: `public class Practice {
+      test: `// Practice.java
+public class Practice {
     // paste your average method here
 
     public static void main(String[] args) {
@@ -267,7 +269,8 @@ window.EXERCISES = [
     }
     return count;
 }`,
-      test: `public class Practice {
+      test: `// Practice.java
+public class Practice {
     // paste your countAbove method here
 
     public static void main(String[] args) {
@@ -287,7 +290,8 @@ window.EXERCISES = [
     }
     return result;
 }`,
-      test: `import java.util.Arrays;
+      test: `// Practice.java
+import java.util.Arrays;
 
 public class Practice {
     // paste your applyDiscount method here
@@ -313,7 +317,8 @@ public class Practice {
     }
     return shares;
 }`,
-      test: `import java.util.Arrays;
+      test: `// Practice.java
+import java.util.Arrays;
 
 public class Practice {
     // paste your sharePercent method here
@@ -335,7 +340,8 @@ public class Practice {
     }
     return largest;
 }`,
-      test: `public class Practice {
+      test: `// Practice.java
+public class Practice {
     // paste your max method here
 
     public static void main(String[] args) {
@@ -356,7 +362,8 @@ public class Practice {
     }
     return -1;                             // the loop ended: not found
 }`,
-      test: `public class Practice {
+      test: `// Practice.java
+public class Practice {
     // paste your indexOf method here
 
     public static void main(String[] args) {
@@ -381,7 +388,8 @@ public class Practice {
     }
     return count;
 }`,
-      test: `public class Practice {
+      test: `// Practice.java
+public class Practice {
     // paste your countVowels method here
 
     public static void main(String[] args) {
@@ -407,7 +415,8 @@ public class Practice {
         return "F";
     }
 }`,
-      test: `public class Practice {
+      test: `// Practice.java
+public class Practice {
     // paste your letterGrade method here
 
     public static void main(String[] args) {
@@ -435,7 +444,8 @@ rowAverages(scores)   // returns {90.0, 77.5, 62.5}`,
     }
     return averages;
 }`,
-      test: `import java.util.Arrays;
+      test: `// Practice.java
+import java.util.Arrays;
 
 public class Practice {
     // paste your rowAverages method here
@@ -463,7 +473,8 @@ columnTotals(sales)   // returns {30, 55, 80, 105}`,
     }
     return totals;
 }`,
-        test: `import java.util.Arrays;
+        test: `// Practice.java
+import java.util.Arrays;
 
 public class Practice {
     // paste your columnTotals method here
@@ -486,7 +497,8 @@ public class Practice {
     }
     return grid;
 }`,
-      test: `import java.util.Arrays;
+      test: `// Practice.java
+import java.util.Arrays;
 
 public class Practice {
     // paste your makeGrid method here
@@ -805,7 +817,7 @@ public class Main {
     }
 }` }],
     note: 'If <code>memberCount</code> were not <code>static</code>, every member would have its own counter → every member would be #1.' },
-  { id: 'E.5', section: 'E', title: 'Inherited methods',
+  { id: 'E.5', section: 'E', title: 'Inherited methods and static',
     code: `public class Account {
     private String owner;
     protected double balance;
@@ -822,8 +834,9 @@ public class SavingsAccount extends Account {
 }`,
     parts: [
       { kind: 'value', label: '(a) <code>SavingsAccount account = new SavingsAccount("Ana", 200.0, 0.05);</code><br>After calling <code>account.addInterest()</code> once, <code>account.getBalance()</code> returns', answer: 210.0 },
-      { kind: 'value', label: '(b) … after a second call, it returns', answer: 220.5 }],
-    note: 'Second call: <code>210.0 + 210.0 * 0.05 = 210.0 + 10.5</code>. The interest is computed on the <em>new</em> balance.' },
+      { kind: 'value', label: '(b) … after a second call, it returns', answer: 220.5 },
+      { kind: 'value', label: '(c) Then <code>Account other = new Account("Ben", 50.0);</code> runs. Now <code>Account.getCount()</code> returns', answer: 2 }],
+    note: 'Second call: <code>210.0 + 210.0 * 0.05 = 210.0 + 10.5</code>. The interest is computed on the <em>new</em> balance. <code>count</code> is <code>static</code>: one variable shared by all accounts. The <code>SavingsAccount</code> constructor calls the <code>Account</code> constructor (<code>super(...)</code>), so both objects count.' },
 
   { id: 'E.6', section: 'E', title: 'From a description: exceptions',
     body: 'Implement <code>BankAccount</code> from this description:<ul><li>Each account has an owner (a <code>String</code>) and a balance (a <code>double</code>). Both are private.</li><li>The constructor takes the owner. A new account has a balance of <code>0.0</code>.</li><li><code>getBalance()</code> returns the balance, and <code>deposit(amount)</code> adds to it.</li><li><code>withdraw(amount)</code> subtracts from the balance. If the amount is larger than the balance, it throws an <code>IllegalArgumentException</code> with the message <code>"Not enough money"</code> and does not change the balance.</li></ul>',
@@ -853,6 +866,7 @@ public class SavingsAccount extends Account {
         balance -= amount;                 // not reached after throw
     }
 }`,
+        testIntro: 'Copy this file, add your class, and run it. The first line should show the same value twice. Then the program should stop with the exception: that is the expected result here.',
         test: `// Main.java -- in the same folder as BankAccount.java
 public class Main {
     public static void main(String[] args) {
